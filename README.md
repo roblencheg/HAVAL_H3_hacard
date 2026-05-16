@@ -59,7 +59,10 @@ A full-screen **Lovelace custom card** for **Home Assistant** that turns your da
 The card includes a bundled default Haval H3 image from `docs/haval_h3.png`.
 You do not need to copy the image manually.
 
-To override it:
+If `vehicle_image` is not set, the bundled image is used automatically.
+Old paths like `/local/haval_h3_white_sunroof.png` and `/local/haval_h3_white_side.png` are automatically replaced with the bundled image — no config change needed.
+
+To use your own image:
 
 ```yaml
 vehicle_image: /local/my_haval_h3.png

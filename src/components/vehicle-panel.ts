@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { CardConfig, ResolvedEntity, DisplayConfig } from '../types';
 import { resolveEntity, showEntity } from '../utils/entity-resolver';
 import { mergeConfig } from '../utils/config-schema';
+import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 import './overlay-badge';
 
 interface HassEntity {
@@ -95,6 +96,9 @@ export class VehiclePanel extends LitElement {
       padding: 20px;
       text-align: center;
     }
+    .no-image.hidden {
+      display: none;
+    }
     .no-image ha-icon {
       width: 48px;
       height: 48px;
@@ -145,15 +149,27 @@ export class VehiclePanel extends LitElement {
       }
     }
 
+    const handleImgError = (e: Event) => {
+      const target = e.target as HTMLImageElement;
+      const currentSrc = target.currentSrc || target.src;
+      if (currentSrc !== DEFAULT_VEHICLE_IMAGE) {
+        target.src = DEFAULT_VEHICLE_IMAGE;
+      } else {
+        target.style.display = 'none';
+        target.parentElement?.querySelector('.no-image')?.classList.remove('hidden');
+      }
+    };
+
     return html`
       ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
       <div class="image-container">
         ${hasImage ? html`
           <img class="vehicle-img" src="${imgSrc}" alt="${this.config.vehicle?.name || 'Vehicle'}" 
-               @error=${(e: Event) => {
-                 const target = e.target as HTMLImageElement;
-                 target.style.display = 'none';
-               }} />
+               @error=${handleImgError} />
+          <div class="no-image hidden">
+            <ha-icon icon="mdi:car-side"></ha-icon>
+            <span>Vehicle image not configured.<br>Set <code>vehicle_image</code> in card config.</span>
+          </div>
           <div class="overlay-container">
             ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
             ${this.getResolvedEntities().map((entity) => html`

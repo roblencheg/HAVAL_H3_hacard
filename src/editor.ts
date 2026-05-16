@@ -124,9 +124,9 @@ export class HavalH3Editor extends LitElement {
             <label class="field-label">Vehicle Image Path</label>
             <input
               class="field-input"
-              .value=${this.config.vehicle_image || ''}
+              .value=${this.config.vehicle_image?.startsWith('data:image/') ? '' : (this.config.vehicle_image || '')}
               @input=${(e: InputEvent) => this._updateField('vehicle_image', (e.target as HTMLInputElement).value)}
-              placeholder="/local/haval_h3_white_sunroof.png"
+              placeholder="Bundled default image, or /local/my_haval_h3.png"
             />
           </div>
         </div>
