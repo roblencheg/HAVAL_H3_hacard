@@ -87,6 +87,45 @@ Recommended image format: PNG with transparent background, ~800×600 px.
 
 > **Important**: Entity IDs shown below are examples. Your actual entity IDs may differ depending on your integration configuration and device names. Check your Home Assistant **Settings → Devices & Services** for the exact entity IDs created by cesar-smart-hass and HAVAL_H3 integrations.
 
+### Configuring sensors in visual editor
+
+The card includes a built-in visual editor for sensor configuration:
+
+1. Open the card in the Lovelace dashboard editor
+2. In the **Vehicle Sensors** section you will find groups:
+   - TPMS / Tires
+   - Doors & Openings
+   - Power & Engine
+   - Security
+   - Climate
+   - Info / Telemetry
+3. For each sensor you can:
+   - **Toggle** enabled/disabled with the checkbox
+   - **Select an entity** using the entity picker (or type manually)
+   - **Set a label** (e.g. "FL", "FR")
+   - **Set a unit** (e.g. "bar", "°C")
+   - **Choose a position** on the vehicle image
+   - **Set precision** (number of decimal places for numeric sensors)
+4. Use **"Add default Haval H3 sensor layout"** to populate all sensors with default labels, units and positions
+5. Use **"Try auto-detect entities"** to automatically find matching entities from your Home Assistant instance
+
+> Sensors with empty entity fields or disabled state are hidden on the card.
+
+### Manual YAML sensor configuration
+
+For full control, you can configure sensors directly in YAML:
+
+```yaml
+entities:
+  battery:
+    enabled: true
+    label: Battery
+    unit: V
+    position: battery_area
+    precision: 1
+    entity: sensor.battery_voltage
+```
+
 ### Minimal Configuration
 
 ```yaml
