@@ -1,7 +1,7 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CardConfig, ResolvedEntity, EntityConfig, DisplayConfig } from '../types';
-import { resolvePosition, computeStyle } from '../utils/position-resolver';
+import { resolvePosition, clampPercentage } from '../utils/position-resolver';
 import { formatEntityValue, getEntityIcon, getEntityColor, showEntity } from '../utils/entity-resolver';
 
 export class OverlayBadge extends LitElement {
@@ -12,11 +12,11 @@ export class OverlayBadge extends LitElement {
 
   static styles = css`
     :host {
-      position: absolute;
       pointer-events: auto;
       z-index: 10;
     }
     .badge {
+      position: absolute;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -77,7 +77,7 @@ export class OverlayBadge extends LitElement {
       white-space: nowrap;
       pointer-events: none;
     }
-    :host(:hover) .tooltip {
+    .badge:hover .tooltip {
       display: block;
     }
     .debug-dot {
@@ -109,7 +109,6 @@ export class OverlayBadge extends LitElement {
       return html``;
     }
 
-    const style = computeStyle(pos);
     const color = getEntityColor(this.entity, this.entityConfig, this.display);
     const icon = getEntityIcon(this.entity, this.entityConfig);
     const value = formatEntityValue(this.entity, this.entityConfig, this.display);
@@ -117,16 +116,26 @@ export class OverlayBadge extends LitElement {
     const alertColor = 'var(--error-color, #f44336)';
     const isDebug = this.display.debug_positions;
 
+    const topPct = pos.top !== undefined ? clampPercentage(pos.top) : undefined;
+    const leftPct = pos.left !== undefined ? clampPercentage(pos.left) : undefined;
+    const bottomPct = pos.bottom !== undefined ? clampPercentage(pos.bottom) : undefined;
+    const rightPct = pos.right !== undefined ? clampPercentage(pos.right) : undefined;
+
+    const posStyle = [
+      topPct !== undefined ? `top:${topPct}%` : '',
+      leftPct !== undefined ? `left:${leftPct}%` : '',
+      bottomPct !== undefined ? `bottom:${bottomPct}%` : '',
+      rightPct !== undefined ? `right:${rightPct}%` : '',
+    ].filter(Boolean).join(';');
+
     return html`
-      <div style="${style}">
+      <div class="badge" style="${posStyle}${isAlert ? `;border-color:${alertColor};box-shadow:0 0 12px ${alertColor}40` : ''}${isDebug ? ';opacity:0.4' : ''}">
         ${isDebug ? html`<div class="debug-dot"></div>` : ''}
-        <div class="badge" style="${isAlert ? `border-color: ${alertColor}; box-shadow: 0 0 12px ${alertColor}40;` : ''}${isDebug ? ' opacity: 0.4;' : ''}">
-          ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
-          ${this.display.show_icons ? html`<span class="icon" style="color: ${color}">${icon}</span>` : ''}
-          ${this.display.show_labels && this.entityConfig.label ? html`<span class="label">${this.entityConfig.label}</span>` : ''}
-          <span class="value" style="color: ${color}">${value}</span>
-          ${this.display.show_units && this.entityConfig.unit ? html`<span class="unit">${this.entityConfig.unit}</span>` : ''}
-        </div>
+        ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
+        ${this.display.show_icons ? html`<span class="icon" style="color:${color}">${icon}</span>` : ''}
+        ${this.display.show_labels && this.entityConfig.label ? html`<span class="label">${this.entityConfig.label}</span>` : ''}
+        <span class="value" style="color:${color}">${value}</span>
+        ${this.display.show_units && this.entityConfig.unit ? html`<span class="unit">${this.entityConfig.unit}</span>` : ''}
       </div>
     `;
   }

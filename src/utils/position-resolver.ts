@@ -42,3 +42,12 @@ export function computeStyle(pos: PositionConfig): string {
 
   return parts.join('; ');
 }
+
+export function normalizePositionStyle(pos: PositionConfig): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (pos.top !== undefined) result.top = `${clampPercentage(pos.top)}%`;
+  if (pos.left !== undefined) result.left = `${clampPercentage(pos.left)}%`;
+  if (pos.bottom !== undefined) result.bottom = `${clampPercentage(pos.bottom)}%`;
+  if (pos.right !== undefined) result.right = `${clampPercentage(pos.right)}%`;
+  return result;
+}
