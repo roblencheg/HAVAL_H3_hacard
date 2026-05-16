@@ -1,7 +1,7 @@
 export const CARD_NAME = 'haval-h3-dashboard-card';
 export const EDITOR_NAME = 'haval-h3-dashboard-editor';
 export const CARD_TITLE = 'Haval H3 Dashboard';
-export const CARD_VERSION = '1.3.0';
+export const CARD_VERSION = '1.3.1';
 
 export const CESAR_ENTITY_MAP = {
   sensors: {
