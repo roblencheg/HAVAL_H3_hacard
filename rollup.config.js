@@ -6,9 +6,9 @@ import terser from '@rollup/plugin-terser';
 export default {
   input: 'src/index.ts',
   output: {
-    file: 'dist/haval-h3-dashboard-card.js',
+    file: 'haval-h3-dashboard-card.js',
     format: 'es',
-    sourcemap: true,
+    sourcemap: false,
     inlineDynamicImports: true,
   },
   plugins: [

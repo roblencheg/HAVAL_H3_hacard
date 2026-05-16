@@ -43,8 +43,8 @@ A full-screen **Lovelace custom card** for **Home Assistant** that turns your da
 
 ### Manual install
 
-1. Download the latest `haval-h3-dashboard-card.zip` from [releases](https://github.com/roblencheg/HAVAL_H3_hacard/releases)
-2. Extract `haval-h3-dashboard-card.js` into your `config/www/` directory
+1. Download the latest `haval-h3-dashboard-card.js` from [releases](https://github.com/roblencheg/HAVAL_H3_hacard/releases)
+2. Place it into your `config/www/` directory
 3. Add the resource in Lovelace:
    - Settings → Dashboards → Resources → Add Resource
    - URL: `/local/haval-h3-dashboard-card.js`
