@@ -1,6 +1,7 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CardConfig, DEFAULT_IMAGE } from './types';
+import { CardConfig } from './types';
+import { DEFAULT_VEHICLE_IMAGE } from './generated/default-image';
 import { CARD_NAME, CARD_VERSION } from './const';
 import { mergeConfig, validateConfig } from './utils/config-schema';
 import './components/vehicle-panel';
@@ -110,7 +111,7 @@ export class HavalH3Card extends LitElement {
   static getStubConfig(): Record<string, unknown> {
     return {
       title: 'Haval H3',
-      vehicle_image: DEFAULT_IMAGE,
+      vehicle_image: DEFAULT_VEHICLE_IMAGE,
       layout: { left_width: 50, right_width: 50 },
       map: {
         device_tracker: '',

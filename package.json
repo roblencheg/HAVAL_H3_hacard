@@ -4,6 +4,7 @@
   "description": "Lovelace custom card for Haval H3 dashboard — displays vehicle data from cesar-smart-hass and HAVAL_H3 integrations with interactive map",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/generate-default-image.mjs",
     "build": "rollup -c rollup.config.js",
     "watch": "rollup -c rollup.config.js --watch",
     "lint": "eslint src/ --ext .ts",

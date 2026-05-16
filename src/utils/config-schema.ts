@@ -1,4 +1,5 @@
 import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout } from '../types';
+import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 
 const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover'];
 
@@ -19,7 +20,7 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
   return {
     type: raw.type || 'custom:haval-h3-dashboard-card',
     title: raw.title || 'Haval H3',
-    vehicle_image: raw.vehicle_image || '/local/haval_h3_white_sunroof.png',
+    vehicle_image: raw.vehicle_image || DEFAULT_VEHICLE_IMAGE,
     vehicle: {
       name: raw.vehicle?.name || 'Haval H3',
       show_default_image: raw.vehicle?.show_default_image ?? true,
