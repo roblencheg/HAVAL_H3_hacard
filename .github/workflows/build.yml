@@ -29,13 +29,16 @@ jobs:
         run: npm run build
 
       - name: Verify output
-        run: test -f dist/haval-h3-dashboard-card.js && echo "OK" || exit 1
+        run: |
+          test -f haval-h3-dashboard-card.js
+          grep "1.2.1" haval-h3-dashboard-card.js
+          ls -lh haval-h3-dashboard-card.js
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: haval-h3-dashboard-card
-          path: dist/
+          path: haval-h3-dashboard-card.js
 
   release:
     if: github.event_name == 'release' && github.event.action == 'published'
@@ -48,20 +51,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: haval-h3-dashboard-card
-          path: dist/
-
-      - name: Create release archive
-        run: |
-          cd dist
-          zip -r ../haval-h3-dashboard-card.zip .
-          cd ..
+          path: .
 
       - name: Upload release asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v2
+        with:
+          files: haval-h3-dashboard-card.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./haval-h3-dashboard-card.zip
-          asset_name: haval-h3-dashboard-card.zip
-          asset_content_type: application/zip
