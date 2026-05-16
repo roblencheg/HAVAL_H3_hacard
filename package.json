@@ -1,0 +1,39 @@
+{
+  "name": "lovelace-haval-h3-card",
+  "version": "1.0.0",
+  "description": "Lovelace custom card for Haval H3 dashboard — displays vehicle data from cesar-smart-hass and HAVAL_H3 integrations with interactive map",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "watch": "rollup -c rollup.config.js --watch",
+    "lint": "eslint src/ --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT",
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "custom-card",
+    "haval",
+    "haval-h3",
+    "cesar-smart",
+    "gwm",
+    "hacs"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "rollup": "^4.12.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "lit": "^3.1.2",
+    "home-assistant-js-websocket": "^9.3.0"
+  }
+}

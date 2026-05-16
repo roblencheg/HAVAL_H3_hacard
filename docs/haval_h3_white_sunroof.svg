@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f0f0"/>
+      <stop offset="100%" stop-color="#d4d4d4"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#87ceeb" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#4a90d9" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#555"/>
+      <stop offset="100%" stop-color="#333"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="transparent"/>
+
+  <!-- Ground shadow -->
+  <ellipse cx="400" cy="560" rx="320" ry="20" fill="rgba(0,0,0,0.15)"/>
+
+  <!-- Car Body - Main silhouette (top view - looking down at the car) -->
+  <!-- This is a simplified stylized overhead view of Haval H3 -->
+
+  <!-- Body shadow -->
+  <g transform="translate(2, 3)" opacity="0.1">
+    <path d="M240 340 L240 480 Q240 540 300 540 L500 540 Q560 540 560 480 L560 340 Q560 300 520 280 L480 200 Q470 170 440 160 L360 160 Q330 170 320 200 L280 280 Q240 300 240 340Z" fill="#000"/>
+  </g>
+
+  <!-- Main body -->
+  <path d="M240 340 L240 480 Q240 540 300 540 L500 540 Q560 540 560 480 L560 340 Q560 300 520 280 L480 200 Q470 170 440 160 L360 160 Q330 170 320 200 L280 280 Q240 300 240 340Z" fill="url(#bodyGrad)" stroke="#bbb" stroke-width="2"/>
+
+  <!-- Roof / Sunroof -->
+  <rect x="295" y="195" width="210" height="95" rx="12" fill="url(#glassGrad)" stroke="#999" stroke-width="1.5"/>
+  <!-- Sunroof open panel -->
+  <rect x="360" y="200" width="80" height="85" rx="4" fill="#1a1a2e" opacity="0.7"/>
+  <rect x="360" y="200" width="80" height="85" rx="4" fill="none" stroke="#888" stroke-width="1"/>
+
+  <!-- Windshield area -->
+  <path d="M255 300 Q255 275 280 265 L290 260" fill="none" stroke="#999" stroke-width="1.5"/>
+  <path d="M545 300 Q545 275 520 265 L510 260" fill="none" stroke="#999" stroke-width="1.5"/>
+
+  <!-- Windshield glass -->
+  <path d="M255 300 L290 260 L510 260 L545 300Z" fill="url(#glassGrad)" opacity="0.5"/>
+
+  <!-- Rear window -->
+  <path d="M245 480 L260 500 L540 500 L555 480Z" fill="url(#glassGrad)" opacity="0.4"/>
+
+  <!-- Hood lines -->
+  <line x1="320" y1="290" x2="320" y2="340" stroke="#ccc" stroke-width="1"/>
+  <line x1="480" y1="290" x2="480" y2="340" stroke="#ccc" stroke-width="1"/>
+  <line x1="400" y1="270" x2="400" y2="350" stroke="#ddd" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+  <!-- Front left wheel area -->
+  <ellipse cx="270" cy="440" rx="25" ry="18" fill="#333" stroke="#222" stroke-width="2"/>
+  <ellipse cx="270" cy="440" rx="15" ry="10" fill="#555"/>
+  <ellipse cx="270" cy="440" rx="5" ry="5" fill="#777"/>
+
+  <!-- Front right wheel area -->
+  <ellipse cx="530" cy="440" rx="25" ry="18" fill="#333" stroke="#222" stroke-width="2"/>
+  <ellipse cx="530" cy="440" rx="15" ry="10" fill="#555"/>
+  <ellipse cx="530" cy="440" rx="5" ry="5" fill="#777"/>
+
+  <!-- Rear left wheel area -->
+  <ellipse cx="305" cy="525" rx="22" ry="15" fill="#333" stroke="#222" stroke-width="2"/>
+  <ellipse cx="305" cy="525" rx="12" ry="8" fill="#555"/>
+  <ellipse cx="305" cy="525" rx="4" ry="4" fill="#777"/>
+
+  <!-- Rear right wheel area -->
+  <ellipse cx="495" cy="525" rx="22" ry="15" fill="#333" stroke="#222" stroke-width="2"/>
+  <ellipse cx="495" cy="525" rx="12" ry="8" fill="#555"/>
+  <ellipse cx="495" cy="525" rx="4" ry="4" fill="#777"/>
+
+  <!-- Doors -->
+  <!-- Front Left Door -->
+  <rect x="255" y="340" width="55" height="110" rx="4" fill="#e8e8e8" stroke="#bbb" stroke-width="1"/>
+  <!-- Door handle FL -->
+  <rect x="275" y="380" width="25" height="6" rx="3" fill="#aaa"/>
+
+  <!-- Front Right Door -->
+  <rect x="490" y="340" width="55" height="110" rx="4" fill="#e8e8e8" stroke="#bbb" stroke-width="1"/>
+  <rect x="500" y="380" width="25" height="6" rx="3" fill="#aaa"/>
+
+  <!-- Rear Left Door -->
+  <rect x="290" y="455" width="60" height="70" rx="4" fill="#e0e0e0" stroke="#bbb" stroke-width="1"/>
+  <rect x="305" y="475" width="25" height="6" rx="3" fill="#aaa"/>
+
+  <!-- Rear Right Door -->
+  <rect x="450" y="455" width="60" height="70" rx="4" fill="#e0e0e0" stroke="#bbb" stroke-width="1"/>
+  <rect x="470" y="475" width="25" height="6" rx="3" fill="#aaa"/>
+
+  <!-- Hood panel -->
+  <rect x="250" y="290" width="300" height="55" rx="6" fill="#ececec" stroke="#ccc" stroke-width="1"/>
+
+  <!-- Trunk -->
+  <rect x="280" y="490" width="240" height="45" rx="6" fill="#e8e8e8" stroke="#bbb" stroke-width="1"/>
+
+  <!-- Front center area (grille/bumper) -->
+  <path d="M280 540 Q400 550 520 540" fill="none" stroke="#bbb" stroke-width="2"/>
+
+  <!-- Headlights -->
+  <ellipse cx="250" cy="355" rx="12" ry="8" fill="#fff8dc" stroke="#ddd" stroke-width="1"/>
+  <ellipse cx="550" cy="355" rx="12" ry="8" fill="#fff8dc" stroke="#ddd" stroke-width="1"/>
+
+  <!-- Taillights -->
+  <ellipse cx="285" cy="510" rx="8" ry="6" fill="#ff6b6b" stroke="#ccc" stroke-width="1"/>
+  <ellipse cx="515" cy="510" rx="8" ry="6" fill="#ff6b6b" stroke="#ccc" stroke-width="1"/>
+
+  <!-- Logo area -->
+  <circle cx="400" cy="325" r="12" fill="#1a73e8" opacity="0.8"/>
+  <text x="400" y="329" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="bold">H</text>
+
+  <!-- License plate -->
+  <rect x="375" y="540" width="50" height="16" rx="3" fill="#fff" stroke="#aaa" stroke-width="1"/>
+  <text x="400" y="552" font-family="monospace" font-size="7" fill="#333" text-anchor="middle">H3</text>
+
+  <!-- Model label -->
+  <text x="400" y="310" font-family="Arial" font-size="10" fill="#999" text-anchor="middle" font-weight="500">HAVAL H3</text>
+
+  <!-- Wheels labels -->
+  <text x="270" y="475" font-family="Arial" font-size="8" fill="#666" text-anchor="middle">FL</text>
+  <text x="530" y="475" font-family="Arial" font-size="8" fill="#666" text-anchor="middle">FR</text>
+  <text x="305" y="550" font-family="Arial" font-size="8" fill="#666" text-anchor="middle">RL</text>
+  <text x="495" y="550" font-family="Arial" font-size="8" fill="#666" text-anchor="middle">RR</text>
+
+  <!-- Watermark -->
+  <text x="400" y="590" font-family="Arial" font-size="9" fill="#aaa" text-anchor="middle" opacity="0.5">Haval H3 White Sunroof (placeholder)</text>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "name": "Haval H3 Dashboard Card",
+  "filename": "haval-h3-dashboard-card.js",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2023.8.0",
+  "country": ["RU", "UA", "BY", "KZ", "US", "GB", "DE", "FR"],
+  "persistent_directory": "dist",
+  "iot_class": "Cloud Polling",
+  "domains": ["lovelace"],
+  "zip_release": true,
+  "filename_url": "dist/haval-h3-dashboard-card.js"
+}
