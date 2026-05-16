@@ -109,30 +109,51 @@ export const PRESET_POSITIONS: Record<string, PositionConfig> = {
 };
 
 export const SIDE_FRONT_RIGHT_POSITIONS: Record<string, PositionConfig> = {
-  front_left_wheel: { top: 68, left: 55 },
-  front_right_wheel: { top: 66, left: 72 },
-  rear_left_wheel: { top: 72, left: 18 },
-  rear_right_wheel: { top: 70, left: 35 },
-  front_left_wheel_secondary: { top: 74, left: 55 },
-  front_right_wheel_secondary: { top: 72, left: 72 },
-  rear_left_wheel_secondary: { top: 78, left: 18 },
-  rear_right_wheel_secondary: { top: 76, left: 35 },
-  hood: { top: 20, left: 72 },
-  engine: { top: 28, left: 68 },
-  roof: { top: 2, left: 42 },
-  windshield: { top: 8, left: 60 },
-  dashboard: { top: 35, left: 65 },
-  center_console: { top: 42, left: 45 },
-  fuel_area: { top: 60, left: 25 },
-  battery_area: { top: 48, left: 72 },
-  trunk: { top: 76, left: 8 },
-  front_center: { top: 15, left: 75 },
-  rear_center: { top: 68, left: 12 },
-  info_block: { top: 50, left: 75 },
-  door_front_left: { top: 38, left: 38 },
-  door_front_right: { top: 38, left: 58 },
-  door_back_left: { top: 52, left: 20 },
-  door_back_right: { top: 52, left: 38 },
+  rear_visible_wheel: { top: 73, left: 22 },
+  front_visible_wheel: { top: 73, left: 78 },
+
+  front_left_wheel: { top: 65, left: 78 },
+  front_right_wheel: { top: 82, left: 78 },
+  rear_left_wheel: { top: 65, left: 22 },
+  rear_right_wheel: { top: 82, left: 22 },
+
+  front_left_wheel_secondary: { top: 59, left: 78 },
+  front_right_wheel_secondary: { top: 88, left: 78 },
+  rear_left_wheel_secondary: { top: 59, left: 22 },
+  rear_right_wheel_secondary: { top: 88, left: 22 },
+
+  hood: { top: 37, left: 78 },
+  engine: { top: 48, left: 78 },
+  trunk: { top: 43, left: 12 },
+  roof: { top: 12, left: 47 },
+  sunroof: { top: 14, left: 54 },
+  windshield: { top: 23, left: 66 },
+  rear_window: { top: 26, left: 23 },
+
+  door_front_left: { top: 47, left: 51 },
+  door_front_right: { top: 57, left: 51 },
+  door_back_left: { top: 47, left: 34 },
+  door_back_right: { top: 57, left: 34 },
+
+  dashboard: { top: 37, left: 61 },
+  center_console: { top: 45, left: 54 },
+  cabin: { top: 34, left: 46 },
+
+  engine_temperature: { top: 31, left: 82 },
+  outdoor_temperature: { top: 18, left: 82 },
+
+  fuel_area: { top: 58, left: 37 },
+  battery_area: { top: 58, left: 70 },
+  mileage: { top: 91, left: 50 },
+  info_block: { top: 91, left: 50 },
+
+  ignition: { top: 40, left: 63 },
+  engine_state: { top: 50, left: 83 },
+  security_mode: { top: 8, left: 47 },
+  label_state: { top: 8, left: 60 },
+
+  front_center: { top: 30, left: 82 },
+  rear_center: { top: 35, left: 15 },
 };
 
 export const POSITION_PRESETS: Record<ImageLayout, Record<string, PositionConfig>> = {

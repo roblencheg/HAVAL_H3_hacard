@@ -35,10 +35,11 @@ A full-screen **Lovelace custom card** for **Home Assistant** that turns your da
 2. Go to "Frontend" → "Custom repositories"
 3. Add `https://github.com/roblencheg/HAVAL_H3_hacard` as a custom repository of type **Lovelace**
 4. Click "Download" on the "Haval H3 Dashboard Card"
-5. Add the resource to your Lovelace dashboard if not auto-added:
+ 5. Add the resource to your Lovelace dashboard if not auto-added:
    - Settings → Dashboards → Resources → Add Resource
-   - URL: `/hacsfiles/haval-h3-dashboard-card/haval-h3-dashboard-card.js`
+   - URL: `/hacsfiles/HAVAL_H3_hacard/haval-h3-dashboard-card.js`
    - Type: JavaScript Module
+   - *Note*: If HACS auto-adds the resource, use the URL shown in Settings → Dashboards → Resources.
 
 ### Manual install
 
@@ -55,7 +56,12 @@ A full-screen **Lovelace custom card** for **Home Assistant** that turns your da
 
 Place your vehicle image in `config/www/` and reference it as `/local/your-image.png`.
 
-The card ships with an SVG placeholder. For the best experience, use a **top-down view** of your Haval H3 (or any vehicle) with transparent or clean background.
+The card ships with an SVG placeholder. Choose the image that matches your `vehicle.image_layout`:
+
+| Layout | Recommended Image |
+|---|---|
+| `front` | Top-down or front view of the vehicle |
+| `side_front_right` | Side 3/4 view, front of the car facing right |
 
 Recommended image format: PNG with transparent background, ~800×600 px.
 
