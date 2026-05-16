@@ -20,6 +20,14 @@
     "gwm",
     "hacs"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roblencheg/HAVAL_H3_hacard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/roblencheg/HAVAL_H3_hacard/issues"
+  },
+  "homepage": "https://github.com/roblencheg/HAVAL_H3_hacard#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",

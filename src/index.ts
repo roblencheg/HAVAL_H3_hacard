@@ -30,7 +30,7 @@ window.customCards.push({
   name: CARD_TITLE,
   description: 'Full-screen dashboard card for Haval H3 with vehicle image overlays and GPS map',
   preview: true,
-  documentationURL: 'https://github.com/anomalyco/haval-h3-dashboard-card',
+  documentationURL: 'https://github.com/roblencheg/HAVAL_H3_hacard',
 });
 
 export { HavalH3Card, HavalH3Editor };

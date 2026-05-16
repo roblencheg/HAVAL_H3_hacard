@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   release:
     types: [published]
 
@@ -22,8 +22,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Build
         run: npm run build
+
+      - name: Verify output
+        run: test -f dist/haval-h3-dashboard-card.js && echo "OK" || exit 1
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
