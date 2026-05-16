@@ -18,6 +18,7 @@ export interface EntityConfig {
   precision?: number;
   hide_unavailable?: boolean;
   color_rules?: ColorRule[];
+  render_area?: 'vehicle' | 'summary' | 'map' | 'hidden';
 }
 
 export interface ColorRule {

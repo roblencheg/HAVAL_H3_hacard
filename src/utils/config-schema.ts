@@ -57,6 +57,7 @@ function normalizeEntityConfig(ent: Partial<EntityConfig>): EntityConfig {
     precision: ent.precision,
     hide_unavailable: ent.hide_unavailable,
     color_rules: ent.color_rules,
+    render_area: ent.render_area,
   };
 }
 

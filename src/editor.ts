@@ -257,6 +257,7 @@ export class HavalH3Editor extends LitElement {
         unit: merged[r.key]?.unit || preset.unit,
         position: merged[r.key]?.position || preset.position,
         precision: merged[r.key]?.precision ?? preset.precision,
+        render_area: merged[r.key]?.render_area || (r.render_area as 'vehicle' | 'summary' | 'map' | 'hidden' | undefined),
       };
     }
     this._updateField('entities', merged);
@@ -286,6 +287,7 @@ export class HavalH3Editor extends LitElement {
     const entityId = cfg.entity || '';
     const autoResult = this._autoDetectResults.get(sensor.key);
     const hasEntityPicker = customElements.get('ha-entity-picker') !== undefined;
+    const currentRenderArea = cfg.render_area || sensor.render_area || '';
 
     const onEntityChange = hasEntityPicker
       ? (e: CustomEvent) => this._updateEntityField(sensor.key, 'entity', e.detail?.value || '')
@@ -325,6 +327,16 @@ export class HavalH3Editor extends LitElement {
           <input class="field-input" .value=${cfg.unit || sensor.unit || ''}
             @input=${(e: InputEvent) => this._updateEntityField(sensor.key, 'unit', (e.target as HTMLInputElement).value)}
             placeholder="${sensor.unit || 'unit'}" />
+        </div>
+        <div class="sensor-field" style="flex: 0 0 100px; min-width: 80px;">
+          <select class="field-select"
+            @change=${(e: Event) => this._updateEntityField(sensor.key, 'render_area', (e.target as HTMLSelectElement).value || undefined)}>
+            <option value="">preset (${sensor.render_area})</option>
+            <option value="vehicle" ?selected=${currentRenderArea === 'vehicle'}>Vehicle</option>
+            <option value="summary" ?selected=${currentRenderArea === 'summary'}>Summary</option>
+            <option value="map" ?selected=${currentRenderArea === 'map'}>Map</option>
+            <option value="hidden" ?selected=${currentRenderArea === 'hidden'}>Hidden</option>
+          </select>
         </div>
         <div class="sensor-field small">
           <select class="field-select"
@@ -380,6 +392,14 @@ export class HavalH3Editor extends LitElement {
             ${this._autoDetecting ? 'Detecting...' : 'Try auto-detect entities'}
           </button>
         </div>
+        ${this._autoDetectResults.size > 0 ? html`
+          <div class="note">
+            Detected ${this._autoDetectResults.size} sensors:
+            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'vehicle').length} vehicle,
+            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'summary').length} summary,
+            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'map').length} map
+          </div>
+        ` : ''}
         ${SECTIONS.filter((s) => s.title !== 'Map / Device Tracker').map((section) => html`
           <h4>${section.title}</h4>
           ${section.sensors.map((s) => this._renderSensorRow(s))}

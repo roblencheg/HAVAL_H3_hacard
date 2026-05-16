@@ -3,8 +3,10 @@ import { property } from 'lit/decorators.js';
 import { CardConfig, ResolvedEntity, DisplayConfig } from '../types';
 import { resolveEntity, showEntity } from '../utils/entity-resolver';
 import { mergeConfig } from '../utils/config-schema';
+import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 import './overlay-badge';
+import './summary-panel';
 
 interface HassEntity {
   state: string;
@@ -124,6 +126,26 @@ export class VehiclePanel extends LitElement {
 
     const resolved: ResolvedEntity[] = [];
     for (const [_key, ent] of Object.entries(entities)) {
+      const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(_key)?.render_area;
+      if (renderArea && renderArea !== 'vehicle') continue;
+      const resolvedEntity = resolveEntity(this.hass as any, ent, display);
+      if (showEntity(resolvedEntity, display)) {
+        resolved.push(resolvedEntity);
+      }
+    }
+    return resolved;
+  }
+
+  getSummaryEntities(): ResolvedEntity[] {
+    const merged = mergeConfig(this.config as unknown as Partial<CardConfig>);
+    const entities = merged.entities;
+    const display = merged.display!;
+    if (!entities) return [];
+
+    const resolved: ResolvedEntity[] = [];
+    for (const [_key, ent] of Object.entries(entities)) {
+      const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(_key)?.render_area;
+      if (renderArea !== 'summary') continue;
       const resolvedEntity = resolveEntity(this.hass as any, ent, display);
       if (showEntity(resolvedEntity, display)) {
         resolved.push(resolvedEntity);
@@ -160,6 +182,14 @@ export class VehiclePanel extends LitElement {
       }
     };
 
+    const vehicleEntities = this.getResolvedEntities();
+    const positionGroups = new Map<string, ResolvedEntity[]>();
+    for (const entity of vehicleEntities) {
+      const pos = entity.config.position || 'default';
+      if (!positionGroups.has(pos)) positionGroups.set(pos, []);
+      positionGroups.get(pos)!.push(entity);
+    }
+
     return html`
       ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
       <div class="image-container">
@@ -172,14 +202,19 @@ export class VehiclePanel extends LitElement {
           </div>
           <div class="overlay-container">
             ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
-            ${this.getResolvedEntities().map((entity) => html`
-              <overlay-badge
-                .entity=${entity}
-                .entityConfig=${entity.config}
-                .display=${this.config.display || {}}
-                .cardConfig=${this.config}
-              ></overlay-badge>
-            `)}
+            ${Array.from(positionGroups.entries()).map(([_pos, entities]) => {
+              const count = entities.length;
+              return entities.map((entity, idx) => html`
+                <overlay-badge
+                  .entity=${entity}
+                  .entityConfig=${entity.config}
+                  .display=${this.config.display || {}}
+                  .cardConfig=${this.config}
+                  .collisionIndex=${idx}
+                  .collisionCount=${count}
+                ></overlay-badge>
+              `);
+            })}
           </div>
         ` : html`
           <div class="no-image">
@@ -188,6 +223,10 @@ export class VehiclePanel extends LitElement {
           </div>
         `}
       </div>
+      <summary-panel
+        .entities=${this.getSummaryEntities()}
+        .display=${this.config.display || {}}
+      ></summary-panel>
     `;
   }
 }

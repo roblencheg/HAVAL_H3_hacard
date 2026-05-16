@@ -98,6 +98,9 @@ export class OverlayBadge extends LitElement {
     }
   `;
 
+  @property({ type: Number }) collisionIndex = 0;
+  @property({ type: Number }) collisionCount = 1;
+
   render(): TemplateResult {
     if (!showEntity(this.entity, this.display)) {
       return html``;
@@ -132,6 +135,13 @@ export class OverlayBadge extends LitElement {
     if (rightPct !== undefined) this.style.right = `${rightPct}%`;
     else this.style.removeProperty('right');
 
+    const offsetY = this.collisionCount > 1 ? (this.collisionIndex - (this.collisionCount - 1) / 2) * 28 : 0;
+    if (offsetY !== 0) {
+      this.style.transform = `translate(-50%, calc(-50% + ${offsetY}px))`;
+    } else {
+      this.style.transform = 'translate(-50%, -50%)';
+    }
+
     const badgeStyle = [
       isAlert ? `border-color:${alertColor};box-shadow:0 0 12px ${alertColor}40` : '',
       isDebug ? 'opacity:0.4' : '',
@@ -141,7 +151,7 @@ export class OverlayBadge extends LitElement {
       <div class="badge" style="${badgeStyle}">
         ${isDebug ? html`<div class="debug-dot"></div>` : ''}
         ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
-        ${this.display.show_icons ? html`<span class="icon" style="color:${color}">${icon}</span>` : ''}
+        ${this.display.show_icons ? html`<span class="icon" style="color:${color}"><ha-icon .icon=${icon}></ha-icon></span>` : ''}
         ${this.display.show_labels && this.entityConfig.label ? html`<span class="label">${this.entityConfig.label}</span>` : ''}
         <span class="value" style="color:${color}">${value}</span>
         ${this.display.show_units && this.entityConfig.unit ? html`<span class="unit">${this.entityConfig.unit}</span>` : ''}

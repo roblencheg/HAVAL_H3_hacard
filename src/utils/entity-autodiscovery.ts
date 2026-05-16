@@ -5,6 +5,7 @@ export interface AutoDiscoveryResult {
   entityId: string;
   confidence: number;
   reason: string;
+  render_area?: 'vehicle' | 'summary' | 'map' | 'hidden';
 }
 
 export interface AutoDiscoveryMapResult {
@@ -199,6 +200,7 @@ export function autoDetectEntities(
       entityId: entry.entityId,
       confidence: entry.score,
       reason: entry.reasons.slice(0, 3).join('; '),
+      render_area: entry.preset.render_area,
     });
   }
 
