@@ -54,7 +54,10 @@ export interface DisplayConfig {
   theme_mode?: 'auto' | 'light' | 'dark';
   unavailable_text?: string;
   show_entity_name_on_hover?: boolean;
+  debug_positions?: boolean;
 }
+
+export type ImageLayout = 'front' | 'side_front_right';
 
 export interface CardConfig {
   type: string;
@@ -63,6 +66,7 @@ export interface CardConfig {
   vehicle?: {
     name?: string;
     show_default_image?: boolean;
+    image_layout?: ImageLayout;
   };
   layout: LayoutConfig;
   map?: MapConfig;
@@ -104,6 +108,44 @@ export const PRESET_POSITIONS: Record<string, PositionConfig> = {
   door_back_right: { top: 65, left: 55 },
 };
 
+export const SIDE_FRONT_RIGHT_POSITIONS: Record<string, PositionConfig> = {
+  front_left_wheel: { top: 68, left: 55 },
+  front_right_wheel: { top: 66, left: 72 },
+  rear_left_wheel: { top: 72, left: 18 },
+  rear_right_wheel: { top: 70, left: 35 },
+  front_left_wheel_secondary: { top: 74, left: 55 },
+  front_right_wheel_secondary: { top: 72, left: 72 },
+  rear_left_wheel_secondary: { top: 78, left: 18 },
+  rear_right_wheel_secondary: { top: 76, left: 35 },
+  hood: { top: 20, left: 72 },
+  engine: { top: 28, left: 68 },
+  roof: { top: 2, left: 42 },
+  windshield: { top: 8, left: 60 },
+  dashboard: { top: 35, left: 65 },
+  center_console: { top: 42, left: 45 },
+  fuel_area: { top: 60, left: 25 },
+  battery_area: { top: 48, left: 72 },
+  trunk: { top: 76, left: 8 },
+  front_center: { top: 15, left: 75 },
+  rear_center: { top: 68, left: 12 },
+  info_block: { top: 50, left: 75 },
+  door_front_left: { top: 38, left: 38 },
+  door_front_right: { top: 38, left: 58 },
+  door_back_left: { top: 52, left: 20 },
+  door_back_right: { top: 52, left: 38 },
+};
+
+export const POSITION_PRESETS: Record<ImageLayout, Record<string, PositionConfig>> = {
+  front: PRESET_POSITIONS,
+  side_front_right: SIDE_FRONT_RIGHT_POSITIONS,
+};
+
+export function getPresetPositions(imageLayout?: ImageLayout): Record<string, PositionConfig> {
+  return imageLayout && POSITION_PRESETS[imageLayout]
+    ? POSITION_PRESETS[imageLayout]
+    : PRESET_POSITIONS;
+}
+
 export const DEFAULT_DISPLAY: DisplayConfig = {
   show_icons: true,
   show_labels: true,
@@ -114,6 +156,7 @@ export const DEFAULT_DISPLAY: DisplayConfig = {
   theme_mode: 'auto',
   unavailable_text: '\u2014',
   show_entity_name_on_hover: false,
+  debug_positions: false,
 };
 
 export const DEFAULT_IMAGE = '/local/haval_h3_white_sunroof.png';

@@ -275,6 +275,39 @@ These named positions can be used in `position:` for any entity:
 | `door_back_left` | Rear left door |
 | `door_back_right` | Rear right door |
 
+### Image Layout Presets
+
+The card supports different vehicle image layouts that remap all preset positions automatically.
+
+Set `vehicle.image_layout` to switch between views:
+
+```yaml
+type: custom:haval-h3-dashboard-card
+vehicle:
+  image_layout: side_front_right
+vehicle_image: /local/haval_h3.png
+```
+
+| Layout | Description |
+|---|---|
+| `front` | Front/top-down view (default) |
+| `side_front_right` | 3/4 side view, car facing right |
+
+When using `side_front_right`, all `position:` values (e.g. `hood`, `trunk`, `front_left_wheel`) are automatically adjusted to match the side perspective.
+
+---
+
+### Debug Mode
+
+Set `display.debug_positions: true` to overlay a 10% grid and position markers — useful for fine-tuning coordinates.
+
+```yaml
+display:
+  debug_positions: true
+```
+
+---
+
 ### Custom Positioning
 
 Use `custom_position` for pixel-perfect placement:

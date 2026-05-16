@@ -1,6 +1,6 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ResolvedEntity, EntityConfig, DisplayConfig } from '../types';
+import { CardConfig, ResolvedEntity, EntityConfig, DisplayConfig } from '../types';
 import { resolvePosition, computeStyle } from '../utils/position-resolver';
 import { formatEntityValue, getEntityIcon, getEntityColor, showEntity } from '../utils/entity-resolver';
 
@@ -8,11 +8,11 @@ export class OverlayBadge extends LitElement {
   @property({ attribute: false }) entity!: ResolvedEntity;
   @property({ attribute: false }) entityConfig!: EntityConfig;
   @property({ attribute: false }) display!: DisplayConfig;
+  @property({ attribute: false }) cardConfig?: CardConfig;
 
   static styles = css`
     :host {
       position: absolute;
-      transform: translate(-50%, -50%);
       pointer-events: auto;
       z-index: 10;
     }
@@ -31,6 +31,7 @@ export class OverlayBadge extends LitElement {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
+      transform: translate(-50%, -50%);
     }
     .badge:hover {
       transform: translate(-50%, -50%) scale(1.1);
@@ -79,6 +80,20 @@ export class OverlayBadge extends LitElement {
     :host(:hover) .tooltip {
       display: block;
     }
+    .debug-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff00;
+      border: 2px solid #fff;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+      pointer-events: none;
+    }
   `;
 
   render(): TemplateResult {
@@ -86,7 +101,10 @@ export class OverlayBadge extends LitElement {
       return html``;
     }
 
-    const pos = resolvePosition(this.entityConfig);
+    const pos = resolvePosition({
+      ...this.entityConfig,
+      imageLayout: this.cardConfig?.vehicle?.image_layout,
+    });
     if (!pos) {
       return html``;
     }
@@ -97,10 +115,12 @@ export class OverlayBadge extends LitElement {
     const value = formatEntityValue(this.entity, this.entityConfig, this.display);
     const isAlert = this.entity.state?.state === 'on' || this.entity.state?.state === 'open';
     const alertColor = 'var(--error-color, #f44336)';
+    const isDebug = this.display.debug_positions;
 
     return html`
       <div style="${style}">
-        <div class="badge" style="${isAlert ? `border-color: ${alertColor}; box-shadow: 0 0 12px ${alertColor}40;` : ''}">
+        ${isDebug ? html`<div class="debug-dot"></div>` : ''}
+        <div class="badge" style="${isAlert ? `border-color: ${alertColor}; box-shadow: 0 0 12px ${alertColor}40;` : ''}${isDebug ? ' opacity: 0.4;' : ''}">
           ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
           ${this.display.show_icons ? html`<span class="icon" style="color: ${color}">${icon}</span>` : ''}
           ${this.display.show_labels && this.entityConfig.label ? html`<span class="label">${this.entityConfig.label}</span>` : ''}

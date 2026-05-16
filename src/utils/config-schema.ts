@@ -1,4 +1,4 @@
-import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY } from '../types';
+import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout } from '../types';
 
 const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover'];
 
@@ -23,6 +23,7 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     vehicle: {
       name: raw.vehicle?.name || 'Haval H3',
       show_default_image: raw.vehicle?.show_default_image ?? true,
+      image_layout: (raw.vehicle?.image_layout as ImageLayout) || 'front',
     },
     layout: normalizeLayout(raw.layout),
     map: normalizeMap(raw.map),

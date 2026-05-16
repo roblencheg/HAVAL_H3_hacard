@@ -1,8 +1,9 @@
-import { PositionConfig, PRESET_POSITIONS } from '../types';
+import { PositionConfig, getPresetPositions, ImageLayout } from '../types';
 
 export function resolvePosition(config: {
   position?: string;
   custom_position?: PositionConfig;
+  imageLayout?: ImageLayout;
 }): PositionConfig | null {
   if (config.custom_position) {
     return {
@@ -10,8 +11,10 @@ export function resolvePosition(config: {
     };
   }
 
-  if (config.position && PRESET_POSITIONS[config.position]) {
-    return { ...PRESET_POSITIONS[config.position] };
+  const presets = getPresetPositions(config.imageLayout);
+
+  if (config.position && presets[config.position]) {
+    return { ...presets[config.position] };
   }
 
   return null;

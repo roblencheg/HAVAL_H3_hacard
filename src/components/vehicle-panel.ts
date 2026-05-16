@@ -37,7 +37,7 @@ export class VehiclePanel extends LitElement {
       overflow: hidden;
       border-radius: 12px;
     }
-    .vehicle-img {
+      .vehicle-img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -56,6 +56,31 @@ export class VehiclePanel extends LitElement {
     }
     .overlay-container > * {
       pointer-events: auto;
+    }
+    .debug-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.3;
+    }
+    .debug-grid-line-h,
+    .debug-grid-line-v {
+      position: absolute;
+      background: rgba(255, 0, 0, 0.5);
+    }
+    .debug-grid-line-h {
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+    .debug-grid-line-v {
+      top: 0;
+      bottom: 0;
+      width: 1px;
     }
     .no-image {
       display: flex;
@@ -107,6 +132,18 @@ export class VehiclePanel extends LitElement {
     const showDefault = this.config.vehicle?.show_default_image !== false;
     const imgSrc = this.config.vehicle_image || '';
     const hasImage = showDefault && imgSrc;
+    const isDebug = this.config.display?.debug_positions;
+
+    const debugGridLines = [];
+    if (isDebug) {
+      for (let i = 0; i <= 10; i++) {
+        const pct = i * 10;
+        debugGridLines.push(
+          html`<div class="debug-grid-line-h" style="top: ${pct}%"></div>`,
+          html`<div class="debug-grid-line-v" style="left: ${pct}%"></div>`,
+        );
+      }
+    }
 
     return html`
       ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
@@ -118,11 +155,13 @@ export class VehiclePanel extends LitElement {
                  target.style.display = 'none';
                }} />
           <div class="overlay-container">
+            ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
             ${this.getResolvedEntities().map((entity) => html`
               <overlay-badge
                 .entity=${entity}
                 .entityConfig=${entity.config}
                 .display=${this.config.display || {}}
+                .cardConfig=${this.config}
               ></overlay-badge>
             `)}
           </div>
