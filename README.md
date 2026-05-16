@@ -497,7 +497,22 @@ npm run watch
 
 # Typecheck
 npm run typecheck
+
+# Check version sync (package.json vs src/const.ts)
+npm run check:version
 ```
+
+### Release checklist
+
+1. Ensure `npm run check:version` passes (package.json and src/const.ts versions match)
+2. Ensure `npm run typecheck` and `npm run build` pass locally
+3. Commit and push to `main`
+4. Verify the Build action is green on GitHub
+5. Create a GitHub Release with tag `v<version>` (e.g. `v1.3.0`)
+6. After the release is created, trigger the **Release** action manually via **Actions → Release → Run workflow`
+   — this uploads `haval-h3-dashboard-card.js` to the release assets
+
+> HACS can also fetch `haval-h3-dashboard-card.js` directly from the repository source archive, so the release asset is optional.
 
 ### Project Structure
 

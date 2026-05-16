@@ -1,16 +1,13 @@
-name: Build
+name: Release
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,8 +37,12 @@ jobs:
           grep "data:image/png;base64" haval-h3-dashboard-card.js
           ls -lh haval-h3-dashboard-card.js
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Read package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload JS to GitHub release
+        uses: softprops/action-gh-release@v2
         with:
-          name: haval-h3-dashboard-card
-          path: haval-h3-dashboard-card.js
+          tag_name: v${{ steps.package-version.outputs.version }}
+          files: haval-h3-dashboard-card.js
