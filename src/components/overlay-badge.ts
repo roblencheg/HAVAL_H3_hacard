@@ -12,11 +12,13 @@ export class OverlayBadge extends LitElement {
 
   static styles = css`
     :host {
+      position: absolute;
       pointer-events: auto;
       z-index: 10;
+      transform: translate(-50%, -50%);
     }
     .badge {
-      position: absolute;
+      position: relative;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -31,10 +33,10 @@ export class OverlayBadge extends LitElement {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
-      transform: translate(-50%, -50%);
+      transform: none;
     }
     .badge:hover {
-      transform: translate(-50%, -50%) scale(1.1);
+      transform: scale(1.08);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       z-index: 20;
     }
@@ -121,15 +123,22 @@ export class OverlayBadge extends LitElement {
     const bottomPct = pos.bottom !== undefined ? clampPercentage(pos.bottom) : undefined;
     const rightPct = pos.right !== undefined ? clampPercentage(pos.right) : undefined;
 
-    const posStyle = [
-      topPct !== undefined ? `top:${topPct}%` : '',
-      leftPct !== undefined ? `left:${leftPct}%` : '',
-      bottomPct !== undefined ? `bottom:${bottomPct}%` : '',
-      rightPct !== undefined ? `right:${rightPct}%` : '',
+    if (topPct !== undefined) this.style.top = `${topPct}%`;
+    else this.style.removeProperty('top');
+    if (leftPct !== undefined) this.style.left = `${leftPct}%`;
+    else this.style.removeProperty('left');
+    if (bottomPct !== undefined) this.style.bottom = `${bottomPct}%`;
+    else this.style.removeProperty('bottom');
+    if (rightPct !== undefined) this.style.right = `${rightPct}%`;
+    else this.style.removeProperty('right');
+
+    const badgeStyle = [
+      isAlert ? `border-color:${alertColor};box-shadow:0 0 12px ${alertColor}40` : '',
+      isDebug ? 'opacity:0.4' : '',
     ].filter(Boolean).join(';');
 
     return html`
-      <div class="badge" style="${posStyle}${isAlert ? `;border-color:${alertColor};box-shadow:0 0 12px ${alertColor}40` : ''}${isDebug ? ';opacity:0.4' : ''}">
+      <div class="badge" style="${badgeStyle}">
         ${isDebug ? html`<div class="debug-dot"></div>` : ''}
         ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
         ${this.display.show_icons ? html`<span class="icon" style="color:${color}">${icon}</span>` : ''}
@@ -141,4 +150,6 @@ export class OverlayBadge extends LitElement {
   }
 }
 
-customElements.define('overlay-badge', OverlayBadge);
+if (!window.customElements.get('overlay-badge')) {
+  window.customElements.define('overlay-badge', OverlayBadge);
+}
