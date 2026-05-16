@@ -2,7 +2,12 @@ import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CardConfig, EntityConfig } from './types';
 import { CARD_NAME, EDITOR_NAME } from './const';
-import { autoDetectEntities } from './utils/entity-autodiscovery';
+import {
+  autoDetectEntities,
+  autoDetectMapEntities,
+  AutoDiscoveryResult,
+} from './utils/entity-autodiscovery';
+import { SENSOR_PRESETS, SENSOR_PRESETS_BY_KEY, SENSOR_SECTIONS, POSITION_OPTIONS, getDefaultEntities, SensorPreset } from './sensor-presets';
 
 interface HassEntity {
   entity_id?: string;
@@ -14,111 +19,18 @@ interface HomeAssistant {
   [key: string]: unknown;
 }
 
-interface SensorPreset {
-  key: string;
-  label: string;
-  unit?: string;
-  position: string;
-  precision?: number;
-}
-
-const POSITION_OPTIONS = [
-  'front_left_wheel', 'front_right_wheel', 'rear_left_wheel', 'rear_right_wheel',
-  'front_left_wheel_secondary', 'front_right_wheel_secondary', 'rear_left_wheel_secondary', 'rear_right_wheel_secondary',
-  'hood', 'engine', 'trunk', 'roof', 'sunroof', 'windshield', 'rear_window',
-  'door_front_left', 'door_front_right', 'door_back_left', 'door_back_right',
-  'dashboard', 'center_console', 'cabin',
-  'engine_temperature', 'outdoor_temperature',
-  'fuel_area', 'battery_area', 'mileage', 'info_block',
-  'ignition', 'engine_state', 'security_mode',
-  'front_center', 'rear_center',
-];
-
 type Section = { title: string; sensors: SensorPreset[] };
 
-const SECTIONS: Section[] = [
-  {
-    title: 'TPMS / Tires',
-    sensors: [
-      { key: 'front_left_tire_pressure', label: 'FL', unit: 'bar', position: 'front_left_wheel', precision: 1 },
-      { key: 'front_right_tire_pressure', label: 'FR', unit: 'bar', position: 'front_right_wheel', precision: 1 },
-      { key: 'rear_left_tire_pressure', label: 'RL', unit: 'bar', position: 'rear_left_wheel', precision: 1 },
-      { key: 'rear_right_tire_pressure', label: 'RR', unit: 'bar', position: 'rear_right_wheel', precision: 1 },
-      { key: 'front_left_tire_temp', label: 'FL', unit: '°C', position: 'front_left_wheel_secondary' },
-      { key: 'front_right_tire_temp', label: 'FR', unit: '°C', position: 'front_right_wheel_secondary' },
-      { key: 'rear_left_tire_temp', label: 'RL', unit: '°C', position: 'rear_left_wheel_secondary' },
-      { key: 'rear_right_tire_temp', label: 'RR', unit: '°C', position: 'rear_right_wheel_secondary' },
-    ],
-  },
-  {
-    title: 'Doors & Openings',
-    sensors: [
-      { key: 'hood', label: 'Hood', position: 'hood' },
-      { key: 'trunk', label: 'Trunk', position: 'trunk' },
-      { key: 'door_front_left', label: 'Front L', position: 'door_front_left' },
-      { key: 'door_front_right', label: 'Front R', position: 'door_front_right' },
-      { key: 'door_back_left', label: 'Rear L', position: 'door_back_left' },
-      { key: 'door_back_right', label: 'Rear R', position: 'door_back_right' },
-    ],
-  },
-  {
-    title: 'Power & Engine',
-    sensors: [
-      { key: 'ignition', label: 'Ignition', position: 'ignition' },
-      { key: 'engine_state', label: 'Engine', position: 'engine_state' },
-      { key: 'battery', label: 'Battery', unit: 'V', position: 'battery_area', precision: 1 },
-      { key: 'fuel', label: 'Fuel', unit: 'L', position: 'fuel_area', precision: 1 },
-      { key: 'mileage', label: 'Mileage', unit: 'km', position: 'mileage' },
-      { key: 'oil_qty', label: 'Oil', unit: 'L', position: 'engine', precision: 1 },
-    ],
-  },
-  {
-    title: 'Security',
-    sensors: [
-      { key: 'security_mode', label: 'Security', position: 'security_mode' },
-      { key: 'tbox_online', label: 'TBOX Online', position: 'info_block' },
-      { key: 'service_status', label: 'Service', position: 'info_block' },
-    ],
-  },
-  {
-    title: 'Climate',
-    sensors: [
-      { key: 'cabin_temp', label: 'Cabin', unit: '°C', position: 'cabin' },
-      { key: 'outdoor_temp', label: 'Outdoor', unit: '°C', position: 'outdoor_temperature' },
-      { key: 'engine_temperature', label: 'Engine Temp', unit: '°C', position: 'engine_temperature' },
-    ],
-  },
-  {
-    title: 'Info / Telemetry',
-    sensors: [
-      { key: 'location_speed', label: 'Speed', unit: 'km/h', position: 'info_block' },
-      { key: 'location_course', label: 'Course', position: 'info_block' },
-      { key: 'last_update', label: 'Updated', position: 'info_block' },
-    ],
-  },
-];
-
-function getDefaultEntities(): Record<string, EntityConfig> {
-  const entities: Record<string, EntityConfig> = {};
-  for (const section of SECTIONS) {
-    for (const preset of section.sensors) {
-      entities[preset.key] = {
-        enabled: true,
-        label: preset.label,
-        unit: preset.unit || undefined,
-        position: preset.position,
-        precision: preset.precision,
-      };
-    }
-  }
-  return entities;
-}
+const SECTIONS: Section[] = SENSOR_SECTIONS.map((s) => ({
+  title: s.title,
+  sensors: (Array.from(SENSOR_PRESETS_BY_KEY.values()) as SensorPreset[]).filter((p) => p.category === s.category),
+})).filter((s) => s.sensors.length > 0);
 
 export class HavalH3Editor extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: CardConfig;
 
-  private _autoDetectResults: Map<string, string> = new Map();
+  private _autoDetectResults: Map<string, AutoDiscoveryResult> = new Map();
   private _autoDetecting = false;
 
   static styles = css`
@@ -272,6 +184,11 @@ export class HavalH3Editor extends LitElement {
       color: var(--success-color, #4caf50);
       margin-left: 4px;
     }
+    .detect-confidence {
+      font-size: 10px;
+      color: var(--secondary-text-color, #888);
+      margin-left: 4px;
+    }
     .collapsed {
       display: none;
     }
@@ -326,15 +243,40 @@ export class HavalH3Editor extends LitElement {
     this._autoDetecting = true;
     await 0;
     const results = autoDetectEntities(this.hass.states);
-    this._autoDetectResults = new Map(results.map((r) => [r.key, r.entityId]));
+    this._autoDetectResults = new Map(results.map((r) => [r.key, r]));
+
     const merged: Record<string, EntityConfig> = { ...(this.config.entities || {}) };
     for (const r of results) {
-      if (!merged[r.key]) {
-        merged[r.key] = { enabled: true, label: r.key.replace(/_/g, ' '), position: r.key };
-      }
-      merged[r.key].entity = r.entityId;
+      const preset = SENSOR_PRESETS_BY_KEY.get(r.key);
+      if (!preset) continue;
+      merged[r.key] = {
+        ...(merged[r.key] || {}),
+        enabled: true,
+        entity: r.entityId,
+        label: merged[r.key]?.label || preset.label,
+        unit: merged[r.key]?.unit || preset.unit,
+        position: merged[r.key]?.position || preset.position,
+        precision: merged[r.key]?.precision ?? preset.precision,
+      };
     }
     this._updateField('entities', merged);
+
+    const mapResult = autoDetectMapEntities(this.hass.states);
+    const mapConfig = { ...(this.config.map || {}) };
+    if (mapResult.device_tracker && !mapConfig.device_tracker) {
+      mapConfig.device_tracker = mapResult.device_tracker;
+    }
+    if (mapResult.speed_entity && !mapConfig.speed_entity) {
+      mapConfig.speed_entity = mapResult.speed_entity;
+    }
+    if (mapResult.course_entity && !mapConfig.course_entity) {
+      mapConfig.course_entity = mapResult.course_entity;
+    }
+    if (mapResult.updated_entity && !mapConfig.updated_entity) {
+      mapConfig.updated_entity = mapResult.updated_entity;
+    }
+    this._updateField('map', mapConfig);
+
     this._autoDetecting = false;
   }
 
@@ -342,7 +284,7 @@ export class HavalH3Editor extends LitElement {
     const cfg = this._getEntityConfig(sensor.key);
     const isEnabled = cfg.enabled !== false;
     const entityId = cfg.entity || '';
-    const autoEntity = this._autoDetectResults.get(sensor.key);
+    const autoResult = this._autoDetectResults.get(sensor.key);
     const hasEntityPicker = customElements.get('ha-entity-picker') !== undefined;
 
     const onEntityChange = hasEntityPicker
@@ -364,13 +306,15 @@ export class HavalH3Editor extends LitElement {
               .includeDomains=${['sensor', 'binary_sensor', 'device_tracker']}
               @value-changed=${onEntityChange}
             ></ha-entity-picker>
-            ${autoEntity && !entityId ? html`<span class="detect-hint">→ ${autoEntity}</span>` : ''}
+            ${autoResult && !entityId ? html`<span class="detect-hint">→ ${autoResult.entityId}</span>` : ''}
           ` : html`
             <input class="field-input" .value=${entityId}
               @input=${onEntityChange}
               placeholder="sensor.xxx" />
-            ${autoEntity && !entityId ? html`<span class="detect-hint">→ ${autoEntity}</span>` : ''}
+            ${autoResult && !entityId ? html`<span class="detect-hint">→ ${autoResult.entityId}</span>` : ''}
           `}
+          ${autoResult && entityId ? html`<span class="detect-hint">✓ ${autoResult.entityId}</span>` : ''}
+          ${autoResult ? html`<span class="detect-confidence">score ${autoResult.confidence}, ${autoResult.reason}</span>` : ''}
         </div>
         <div class="sensor-field small">
           <input class="field-input" .value=${cfg.label || sensor.label || ''}
@@ -436,7 +380,7 @@ export class HavalH3Editor extends LitElement {
             ${this._autoDetecting ? 'Detecting...' : 'Try auto-detect entities'}
           </button>
         </div>
-        ${SECTIONS.map((section) => html`
+        ${SECTIONS.filter((s) => s.title !== 'Map / Device Tracker').map((section) => html`
           <h4>${section.title}</h4>
           ${section.sensors.map((s) => this._renderSensorRow(s))}
         `)}
@@ -464,6 +408,15 @@ export class HavalH3Editor extends LitElement {
               @input=${(e: InputEvent) => this._updateField('map.speed_entity', (e.target as HTMLInputElement).value)}
               placeholder="sensor.location_speed" />
           </div>
+          <div class="field">
+            <label class="field-label">Course Entity</label>
+            <input class="field-input"
+              .value=${this.config.map?.course_entity || ''}
+              @input=${(e: InputEvent) => this._updateField('map.course_entity', (e.target as HTMLInputElement).value)}
+              placeholder="sensor.location_course" />
+          </div>
+        </div>
+        <div class="field-row">
           <div class="field">
             <label class="field-label">Last Updated Entity</label>
             <input class="field-input"
