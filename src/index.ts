@@ -1,4 +1,4 @@
-import { CARD_NAME, CARD_TITLE, CARD_VERSION } from './const';
+import { CARD_NAME, EDITOR_NAME, CARD_TITLE, CARD_VERSION } from './const';
 import { HavalH3Card } from './haval-h3-card';
 import { HavalH3Editor } from './editor';
 
@@ -10,6 +10,10 @@ console.info(
 
 if (!window.customElements.get(CARD_NAME)) {
   window.customElements.define(CARD_NAME, HavalH3Card);
+}
+
+if (!window.customElements.get(EDITOR_NAME)) {
+  window.customElements.define(EDITOR_NAME, HavalH3Editor);
 }
 
 declare global {
@@ -25,13 +29,16 @@ declare global {
 }
 
 window.customCards = window.customCards || [];
-window.customCards.push({
-  type: CARD_NAME,
-  name: CARD_TITLE,
-  description: 'Full-screen dashboard card for Haval H3 with vehicle image overlays and GPS map',
-  preview: true,
-  documentationURL: 'https://github.com/roblencheg/HAVAL_H3_hacard',
-});
+
+if (!window.customCards.some((card) => card.type === CARD_NAME)) {
+  window.customCards.push({
+    type: CARD_NAME,
+    name: CARD_TITLE,
+    description: 'Full-screen dashboard card for Haval H3 with vehicle image overlays and GPS map',
+    preview: true,
+    documentationURL: 'https://github.com/roblencheg/HAVAL_H3_hacard',
+  });
+}
 
 export { HavalH3Card, HavalH3Editor };
-export { CARD_NAME, CARD_TITLE, CARD_VERSION };
+export { CARD_NAME, EDITOR_NAME, CARD_TITLE, CARD_VERSION };

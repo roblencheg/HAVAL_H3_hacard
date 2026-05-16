@@ -102,8 +102,9 @@ export class HavalH3Card extends LitElement {
     }
   `;
 
-  static getConfigElement(): string {
-    return 'haval-h3-dashboard-editor';
+  static async getConfigElement(): Promise<HTMLElement> {
+    await import('./editor');
+    return document.createElement('haval-h3-dashboard-editor');
   }
 
   static getStubConfig(): Record<string, unknown> {
@@ -181,5 +182,3 @@ export class HavalH3Card extends LitElement {
     `;
   }
 }
-
-customElements.define(CARD_NAME, HavalH3Card);

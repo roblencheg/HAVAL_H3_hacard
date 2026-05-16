@@ -1,7 +1,7 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CardConfig } from './types';
-import { CARD_NAME } from './const';
+import { CARD_NAME, EDITOR_NAME } from './const';
 
 interface HomeAssistant {
   [key: string]: unknown;
@@ -246,4 +246,6 @@ export class HavalH3Editor extends LitElement {
   }
 }
 
-customElements.define('haval-h3-dashboard-editor', HavalH3Editor);
+if (!window.customElements.get(EDITOR_NAME)) {
+  window.customElements.define(EDITOR_NAME, HavalH3Editor);
+}
