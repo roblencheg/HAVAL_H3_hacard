@@ -1,7 +1,7 @@
 import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout } from '../types';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 
-const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover'];
+const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover', 'edit_positions'];
 
 const LEGACY_DEFAULT_IMAGE_PATHS = [
   '/local/haval_h3_white_sunroof.png',

@@ -56,6 +56,7 @@ export interface DisplayConfig {
   unavailable_text?: string;
   show_entity_name_on_hover?: boolean;
   debug_positions?: boolean;
+  edit_positions?: boolean;
 }
 
 export type ImageLayout = 'front' | 'side_front_right';
@@ -80,6 +81,7 @@ export interface ResolvedEntity {
   state: HassEntity | null;
   value: string | number | null;
   isUnavailable: boolean;
+  key?: string;
 }
 
 export const PRESET_POSITIONS: Record<string, PositionConfig> = {
@@ -179,6 +181,7 @@ export const DEFAULT_DISPLAY: DisplayConfig = {
   unavailable_text: '\u2014',
   show_entity_name_on_hover: false,
   debug_positions: false,
+  edit_positions: false,
 };
 
 export const DEFAULT_IMAGE = '/local/haval_h3_white_sunroof.png';

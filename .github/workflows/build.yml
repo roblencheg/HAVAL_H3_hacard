@@ -41,6 +41,7 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           grep "$VERSION" haval-h3-dashboard-card.js
           grep "data:image/png;base64" haval-h3-dashboard-card.js
+          grep "<ha-icon" src/components/overlay-badge.ts
           ls -lh haval-h3-dashboard-card.js
 
       - name: Upload artifact

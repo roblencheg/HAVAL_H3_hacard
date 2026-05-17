@@ -9,6 +9,8 @@ export class OverlayBadge extends LitElement {
   @property({ attribute: false }) entityConfig!: EntityConfig;
   @property({ attribute: false }) display!: DisplayConfig;
   @property({ attribute: false }) cardConfig?: CardConfig;
+  @property({ type: Boolean }) editable = false;
+  @property({ type: String }) entityKey = '';
 
   static styles = css`
     :host {
@@ -34,32 +36,52 @@ export class OverlayBadge extends LitElement {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
       transform: none;
+      max-width: 170px;
+      min-height: 24px;
+      overflow: hidden;
     }
     .badge:hover {
       transform: scale(1.08);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       z-index: 20;
     }
+    .badge.editable {
+      cursor: move;
+      outline: 1px dashed var(--primary-color, #03a9f4);
+      outline-offset: 2px;
+    }
     .icon {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      font-size: 14px;
+      justify-content: center;
       width: 16px;
       height: 16px;
+      flex: 0 0 16px;
+      overflow: hidden;
     }
     .icon ha-icon {
       width: 14px;
       height: 14px;
+      --mdc-icon-size: 14px;
+    }
+    .label,
+    .value,
+    .unit {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .label {
       color: var(--overlay-badge-label, rgba(255, 255, 255, 0.7));
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      max-width: 72px;
     }
     .value {
       font-weight: 600;
       font-size: 12px;
+      max-width: 90px;
     }
     .unit {
       font-size: 9px;
@@ -148,7 +170,7 @@ export class OverlayBadge extends LitElement {
     ].filter(Boolean).join(';');
 
     return html`
-      <div class="badge" style="${badgeStyle}">
+      <div class="badge${this.editable ? ' editable' : ''}" style="${badgeStyle}" @pointerdown=${this._handlePointerDown}>
         ${isDebug ? html`<div class="debug-dot"></div>` : ''}
         ${this.display.show_entity_name_on_hover ? html`<div class="tooltip">${this.entityConfig.label || this.entityConfig.entity}</div>` : ''}
         ${this.display.show_icons ? html`<span class="icon" style="color:${color}"><ha-icon .icon=${icon}></ha-icon></span>` : ''}
@@ -157,6 +179,21 @@ export class OverlayBadge extends LitElement {
         ${this.display.show_units && this.entityConfig.unit ? html`<span class="unit">${this.entityConfig.unit}</span>` : ''}
       </div>
     `;
+  }
+
+  private _handlePointerDown(ev: PointerEvent): void {
+    if (!this.editable || !this.entityKey) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.dispatchEvent(new CustomEvent('badge-drag-start', {
+      detail: {
+        key: this.entityKey,
+        clientX: ev.clientX,
+        clientY: ev.clientY,
+      },
+      bubbles: true,
+      composed: true,
+    }));
   }
 }
 

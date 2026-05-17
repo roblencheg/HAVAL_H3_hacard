@@ -1,10 +1,11 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CardConfig, ResolvedEntity, DisplayConfig } from '../types';
+import { CardConfig, ResolvedEntity, DisplayConfig, PositionConfig } from '../types';
 import { resolveEntity, showEntity } from '../utils/entity-resolver';
 import { mergeConfig } from '../utils/config-schema';
 import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
+import { clampPercentage } from '../utils/position-resolver';
 import './overlay-badge';
 import './summary-panel';
 
@@ -20,6 +21,22 @@ interface HassState {
 export class VehiclePanel extends LitElement {
   @property({ attribute: false }) config!: CardConfig;
   @property({ attribute: false }) hass!: HassState;
+
+  private _draggingKey?: string;
+  private _previewPositions: Record<string, { top: number; left: number }> = {};
+
+  private _boundPointerMove = this._handleWindowPointerMove.bind(this);
+  private _boundPointerUp = this._handleWindowPointerUp.bind(this);
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._removeDragListeners();
+  }
+
+  private _removeDragListeners(): void {
+    window.removeEventListener('pointermove', this._boundPointerMove);
+    window.removeEventListener('pointerup', this._boundPointerUp);
+  }
 
   static styles = css`
     :host {
@@ -40,21 +57,26 @@ export class VehiclePanel extends LitElement {
       overflow: hidden;
       border-radius: 12px;
     }
-      .vehicle-img {
+    .image-stage {
+      position: relative;
+      display: inline-block;
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain;
+    }
+    .vehicle-img {
       display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
     }
     .overlay-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       pointer-events: none;
     }
     .overlay-container > * {
@@ -125,12 +147,12 @@ export class VehiclePanel extends LitElement {
     if (!entities) return [];
 
     const resolved: ResolvedEntity[] = [];
-    for (const [_key, ent] of Object.entries(entities)) {
-      const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(_key)?.render_area;
+    for (const [key, ent] of Object.entries(entities)) {
+      const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(key)?.render_area;
       if (renderArea && renderArea !== 'vehicle') continue;
       const resolvedEntity = resolveEntity(this.hass as any, ent, display);
       if (showEntity(resolvedEntity, display)) {
-        resolved.push(resolvedEntity);
+        resolved.push({ ...resolvedEntity, key });
       }
     }
     return resolved;
@@ -154,11 +176,52 @@ export class VehiclePanel extends LitElement {
     return resolved;
   }
 
+  private _handleBadgeDragStart(ev: CustomEvent): void {
+    this._draggingKey = ev.detail.key;
+    window.addEventListener('pointermove', this._boundPointerMove);
+    window.addEventListener('pointerup', this._boundPointerUp);
+  }
+
+  private _handleWindowPointerMove(ev: PointerEvent): void {
+    if (!this._draggingKey) return;
+    const overlay = this.renderRoot.querySelector('.overlay-container') as HTMLElement | null;
+    if (!overlay) return;
+
+    const rect = overlay.getBoundingClientRect();
+    const left = clampPercentage(((ev.clientX - rect.left) / rect.width) * 100);
+    const top = clampPercentage(((ev.clientY - rect.top) / rect.height) * 100);
+
+    this._previewPositions[this._draggingKey] = { top, left };
+    this.requestUpdate();
+  }
+
+  private _handleWindowPointerUp(ev: PointerEvent): void {
+    if (!this._draggingKey) return;
+    const overlay = this.renderRoot.querySelector('.overlay-container') as HTMLElement | null;
+    if (overlay) {
+      const rect = overlay.getBoundingClientRect();
+      const left = clampPercentage(((ev.clientX - rect.left) / rect.width) * 100);
+      const top = clampPercentage(((ev.clientY - rect.top) / rect.height) * 100);
+
+      this.dispatchEvent(new CustomEvent('badge-position-changed', {
+        detail: { key: this._draggingKey, custom_position: { top, left } },
+        bubbles: true,
+        composed: true,
+      }));
+    }
+
+    delete this._previewPositions[this._draggingKey];
+    this._draggingKey = undefined;
+    this._removeDragListeners();
+    this.requestUpdate();
+  }
+
   render(): TemplateResult {
     const showDefault = this.config.vehicle?.show_default_image !== false;
     const imgSrc = this.config.vehicle_image || '';
     const hasImage = showDefault && imgSrc;
     const isDebug = this.config.display?.debug_positions;
+    const editMode = this.config.display?.edit_positions === true;
 
     const debugGridLines = [];
     if (isDebug) {
@@ -194,27 +257,38 @@ export class VehiclePanel extends LitElement {
       ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
       <div class="image-container">
         ${hasImage ? html`
-          <img class="vehicle-img" src="${imgSrc}" alt="${this.config.vehicle?.name || 'Vehicle'}" 
-               @error=${handleImgError} />
-          <div class="no-image hidden">
-            <ha-icon icon="mdi:car-side"></ha-icon>
-            <span>Vehicle image not configured.<br>Set <code>vehicle_image</code> in card config.</span>
-          </div>
-          <div class="overlay-container">
-            ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
-            ${Array.from(positionGroups.entries()).map(([_pos, entities]) => {
-              const count = entities.length;
-              return entities.map((entity, idx) => html`
-                <overlay-badge
-                  .entity=${entity}
-                  .entityConfig=${entity.config}
-                  .display=${this.config.display || {}}
-                  .cardConfig=${this.config}
-                  .collisionIndex=${idx}
-                  .collisionCount=${count}
-                ></overlay-badge>
-              `);
-            })}
+          <div class="image-stage">
+            <img class="vehicle-img" src="${imgSrc}" alt="${this.config.vehicle?.name || 'Vehicle'}" 
+                 @error=${handleImgError} />
+            <div class="no-image hidden">
+              <ha-icon icon="mdi:car-side"></ha-icon>
+              <span>Vehicle image not configured.<br>Set <code>vehicle_image</code> in card config.</span>
+            </div>
+            <div class="overlay-container" @badge-drag-start=${this._handleBadgeDragStart}>
+              ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
+              ${Array.from(positionGroups.entries()).map(([_pos, entities]) => {
+                const count = entities.length;
+                return entities.map((entity, idx) => {
+                  const entityKey = entity.key || '';
+                  const preview = this._previewPositions[entityKey];
+                  const effectiveConfig = preview
+                    ? { ...entity.config, custom_position: preview as PositionConfig }
+                    : entity.config;
+                  return html`
+                    <overlay-badge
+                      .entity=${entity}
+                      .entityKey=${entityKey}
+                      .editable=${editMode}
+                      .entityConfig=${effectiveConfig}
+                      .display=${this.config.display || {}}
+                      .cardConfig=${this.config}
+                      .collisionIndex=${idx}
+                      .collisionCount=${count}
+                    ></overlay-badge>
+                  `;
+                });
+              })}
+            </div>
           </div>
         ` : html`
           <div class="no-image">

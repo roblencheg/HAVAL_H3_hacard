@@ -354,8 +354,18 @@ export class HavalH3Editor extends LitElement {
               placeholder="prec" min="0" max="5" style="text-align:center;" />
           </div>
         ` : ''}
+        ${cfg.custom_position ? html`
+          <button class="btn" style="padding:4px 8px;font-size:11px;" @click=${() => this._resetEntityPosition(sensor.key)} title="Reset custom position">↺</button>
+        ` : ''}
       </div>
     `;
+  }
+
+  private _resetEntityPosition(sensorKey: string): void {
+    const entities = this.config.entities;
+    if (!entities?.[sensorKey]) return;
+    delete entities[sensorKey].custom_position;
+    this._valueChanged();
   }
 
   render(): TemplateResult {
@@ -500,8 +510,28 @@ export class HavalH3Editor extends LitElement {
             </select>
           </div>
         </div>
+        <div class="checkbox-row">
+          <input type="checkbox" ?checked=${this.config.display?.edit_positions === true}
+            @change=${(e: Event) => this._updateField('display.edit_positions', (e.target as HTMLInputElement).checked)}
+            id="edit_positions" />
+          <label for="edit_positions">Edit badge positions (drag to move)</label>
+        </div>
+        <div class="btn-row">
+          <button class="btn" @click=${this._resetAllCustomPositions}>Reset all custom positions</button>
+        </div>
       </div>
     `;
+  }
+
+  private _resetAllCustomPositions(): void {
+    const entities = this.config.entities;
+    if (!entities) return;
+    for (const key of Object.keys(entities)) {
+      if (entities[key]?.custom_position) {
+        delete entities[key].custom_position;
+      }
+    }
+    this._valueChanged();
   }
 }
 

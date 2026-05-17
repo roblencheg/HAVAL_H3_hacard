@@ -147,6 +147,26 @@ export class HavalH3Card extends LitElement {
     }
   }
 
+  private _handleBadgePositionChanged(ev: CustomEvent): void {
+    const { key, custom_position } = ev.detail || {};
+    if (!key || !custom_position) return;
+
+    const config = JSON.parse(JSON.stringify(this.config));
+    config.entities = config.entities || {};
+    config.entities[key] = {
+      ...(config.entities[key] || {}),
+      custom_position,
+    };
+
+    this.config = config;
+
+    this.dispatchEvent(new CustomEvent('config-changed', {
+      detail: { config },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   getCardSize(): number {
     return 5;
   }
@@ -167,6 +187,7 @@ export class HavalH3Card extends LitElement {
             <vehicle-panel
               .config=${this.config}
               .hass=${this.hass}
+              @badge-position-changed=${this._handleBadgePositionChanged}
             ></vehicle-panel>
           </div>
           <div class="right-panel" style="flex: ${rightWidth}; max-width: ${rightWidth}%">
