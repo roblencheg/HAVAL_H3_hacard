@@ -55,28 +55,27 @@ export class CustomBadge extends LitElement {
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(24, 38, 54, 0.88), rgba(10, 20, 30, 0.9));
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      min-height: 42px;
-      max-width: 240px;
-      font-size: 12px;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 12px;
+      background: rgba(12, 20, 30, 0.58);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      min-height: 32px;
+      max-width: 190px;
+      font-size: 11px;
       line-height: 1.3;
       white-space: nowrap;
       box-shadow:
-        0 10px 20px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+        0 6px 16px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
     .badge.editable {
       cursor: grab;
       border-color: rgba(72, 192, 255, 0.26);
       box-shadow:
-        0 10px 24px rgba(0, 0, 0, 0.24),
+        0 8px 18px rgba(0, 0, 0, 0.2),
         0 0 0 1px rgba(72, 192, 255, 0.12);
     }
     .badge.editable:active {
@@ -90,16 +89,16 @@ export class CustomBadge extends LitElement {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
-      flex: 0 0 28px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.08);
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.07);
     }
     .icon ha-icon {
-      width: 16px;
-      height: 16px;
-      --mdc-icon-size: 16px;
+      width: 13px;
+      height: 13px;
+      --mdc-icon-size: 13px;
       color: rgba(235, 243, 251, 0.92);
     }
     .content {
@@ -113,10 +112,10 @@ export class CustomBadge extends LitElement {
       text-overflow: ellipsis;
       white-space: nowrap;
       color: rgba(194, 209, 223, 0.76);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       letter-spacing: 0.02em;
-      max-width: 180px;
+      max-width: 140px;
     }
     .metric {
       display: inline-flex;
@@ -126,15 +125,15 @@ export class CustomBadge extends LitElement {
     }
     .value {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 13px;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 140px;
+      max-width: 110px;
       color: #fff;
     }
     .unit {
-      font-size: 11px;
-      opacity: 0.78;
+      font-size: 10px;
+      opacity: 0.72;
       color: rgba(220, 230, 240, 0.82);
     }
   `;

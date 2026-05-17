@@ -25,8 +25,8 @@ describe('wheel drag save in haval-h3-card (v1.4.0)', () => {
     expect(source).toContain("config.badges");
   });
 
-  it('_handleBadgePositionChanged disables edit mode after saving a new position', () => {
-    expect(source).toContain("edit_positions: false");
+  it('_handleBadgePositionChanged keeps edit mode unchanged after saving a new position', () => {
+    expect(source).not.toContain("edit_positions: false");
   });
 
   it('_handleBadgePositionChanged dispatches config-changed with badge-based config', () => {

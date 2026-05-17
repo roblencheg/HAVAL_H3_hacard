@@ -48,11 +48,14 @@ export class MapPanel extends LitElement {
       background: rgba(6, 11, 18, 0.32);
     }
     .map-container ha-map {
+      display: block;
       width: 100%;
       height: 100%;
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
     }
     .summary-panel {
       display: grid;
@@ -181,11 +184,16 @@ export class MapPanel extends LitElement {
     const lastUpdate = this.getLastUpdate();
     const hasLiveLocation = hasData && latlon;
 
-    const mapEntities: string[] = [];
+    const mapEntities: HassEntity[] = [];
     const trackerId = this.getTrackerEntityId();
-    if (trackerId) mapEntities.push(trackerId);
+    if (trackerId && this.hass.states[trackerId]) {
+      mapEntities.push(this.hass.states[trackerId]);
+    }
     if (this.mapConfig.latitude_entity && this.mapConfig.longitude_entity) {
-      mapEntities.push(this.mapConfig.latitude_entity, this.mapConfig.longitude_entity);
+      const latState = this.hass.states[this.mapConfig.latitude_entity];
+      const lonState = this.hass.states[this.mapConfig.longitude_entity];
+      if (latState) mapEntities.push(latState);
+      if (lonState) mapEntities.push(lonState);
     }
 
     return html`

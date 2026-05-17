@@ -176,10 +176,6 @@ export class HavalH3Card extends LitElement {
 
     const config = JSON.parse(JSON.stringify(this.config));
     config.badges = updateBadgePosition(config, id, position);
-    config.display = {
-      ...(config.display || {}),
-      edit_positions: false,
-    };
 
     this.config = mergeConfig(config);
 
