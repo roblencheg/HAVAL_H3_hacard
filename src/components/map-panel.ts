@@ -22,22 +22,70 @@ export class MapPanel extends LitElement {
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      border-radius: 16px;
+      border-radius: 18px;
       min-height: 400px;
     }
     .map-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
-      border-radius: 12px;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 18px;
       overflow: hidden;
-      background: var(--map-panel-bg, var(--card-background-color, #1a1a2e));
+      background:
+        radial-gradient(circle at top right, rgba(71, 132, 175, 0.16), transparent 30%),
+        linear-gradient(180deg, rgba(13, 24, 35, 0.82), rgba(8, 15, 22, 0.92));
       position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .map-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .map-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 650;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .map-subtitle {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: rgba(208, 220, 233, 0.72);
+    }
+    .map-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(234, 241, 248, 0.9);
+      font-size: 12px;
+      white-space: nowrap;
     }
     .map-container {
       flex: 1;
       position: relative;
       min-height: 300px;
+      overflow: hidden;
+      border-radius: 16px;
+      background: rgba(6, 11, 18, 0.44);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     .map-container ha-map {
       width: 100%;
@@ -47,35 +95,41 @@ export class MapPanel extends LitElement {
       left: 0;
     }
     .summary-panel {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--map-summary-bg, rgba(0, 0, 0, 0.3));
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border-radius: 0 0 12px 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
     }
     .summary-item {
       display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.045);
       color: var(--primary-text-color, #fff);
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: var(--summary-chip-bg, rgba(255, 255, 255, 0.08));
+      min-height: 88px;
+    }
+    .summary-item-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(198, 214, 229, 0.78);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
     .summary-item ha-icon {
-      width: 14px;
-      height: 14px;
-      --mdc-icon-size: 14px;
-    }
-    .summary-label {
-      opacity: 0.6;
+      width: 16px;
+      height: 16px;
+      --mdc-icon-size: 16px;
     }
     .summary-value {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.25;
+      color: #fff;
     }
     .placeholder {
       display: flex;
@@ -87,6 +141,9 @@ export class MapPanel extends LitElement {
       gap: 12px;
       padding: 40px;
       text-align: center;
+      background:
+        radial-gradient(circle at top, rgba(72, 192, 255, 0.08), transparent 36%),
+        rgba(5, 10, 16, 0.3);
     }
     .placeholder ha-icon {
       width: 48px;
@@ -98,16 +155,6 @@ export class MapPanel extends LitElement {
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 12px;
-    }
-    .map-title {
-      text-align: center;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--primary-text-color, #fff);
-      background: var(--card-background-color, transparent);
-      border-radius: 8px;
-      margin-bottom: 4px;
     }
   `;
 
@@ -185,6 +232,8 @@ export class MapPanel extends LitElement {
     const speed = this.getSpeed();
     const course = this.getCourse();
     const lastUpdate = this.getLastUpdate();
+    const heading = this.title || 'Map';
+    const hasLiveLocation = hasData && latlon;
 
     const mapEntities: string[] = [];
     const trackerId = this.getTrackerEntityId();
@@ -194,10 +243,22 @@ export class MapPanel extends LitElement {
     }
 
     return html`
-      ${this.title ? html`<div class="map-title">${this.title}</div>` : ''}
       <div class="map-wrapper">
+        <div class="map-header">
+          <div class="map-title-block">
+            <h3 class="map-title">${heading}</h3>
+            <p class="map-subtitle">
+              ${hasLiveLocation
+                ? 'Live vehicle position with quick trip context.'
+                : hasData
+                  ? 'Map source is configured, waiting for fresh coordinates.'
+                  : 'Connect a tracker or explicit latitude/longitude entities.'}
+            </p>
+          </div>
+          <div class="map-state">${hasLiveLocation ? 'Live GPS signal' : hasData ? 'Waiting for GPS' : 'Map not configured'}</div>
+        </div>
         <div class="map-container">
-          ${hasData && latlon ? html`
+          ${hasLiveLocation ? html`
             <ha-map
               .entities=${mapEntities}
               .hass=${this.hass}
@@ -219,29 +280,37 @@ export class MapPanel extends LitElement {
           <div class="summary-panel">
             ${speed != null ? html`
               <div class="summary-item">
-                <ha-icon icon="mdi:speedometer"></ha-icon>
-                <span class="summary-label">Speed</span>
+                <div class="summary-item-top">
+                  <ha-icon icon="mdi:speedometer"></ha-icon>
+                  <span>Speed</span>
+                </div>
                 <span class="summary-value">${speed} km/h</span>
               </div>
             ` : ''}
             ${course != null ? html`
               <div class="summary-item">
-                <ha-icon icon="mdi:compass"></ha-icon>
-                <span class="summary-label">Course</span>
+                <div class="summary-item-top">
+                  <ha-icon icon="mdi:compass"></ha-icon>
+                  <span>Course</span>
+                </div>
                 <span class="summary-value">${course}°</span>
               </div>
             ` : ''}
             ${lastUpdate != null ? html`
               <div class="summary-item">
-                <ha-icon icon="mdi:clock-outline"></ha-icon>
-                <span class="summary-label">Updated</span>
+                <div class="summary-item-top">
+                  <ha-icon icon="mdi:clock-outline"></ha-icon>
+                  <span>Updated</span>
+                </div>
                 <span class="summary-value">${lastUpdate}</span>
               </div>
             ` : ''}
             ${latlon ? html`
               <div class="summary-item">
-                <ha-icon icon="mdi:crosshairs-gps"></ha-icon>
-                <span class="summary-label">GPS</span>
+                <div class="summary-item-top">
+                  <ha-icon icon="mdi:crosshairs-gps"></ha-icon>
+                  <span>GPS</span>
+                </div>
                 <span class="summary-value">${latlon.lat.toFixed(4)}, ${latlon.lon.toFixed(4)}</span>
               </div>
             ` : ''}

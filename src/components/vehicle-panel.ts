@@ -25,6 +25,7 @@ export class VehiclePanel extends LitElement {
 
   private _boundPointerMove = this._handleWindowPointerMove.bind(this);
   private _boundPointerUp = this._handleWindowPointerUp.bind(this);
+  private _boundPointerCancel = this._handleWindowPointerCancel.bind(this);
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
@@ -40,6 +41,7 @@ export class VehiclePanel extends LitElement {
   private _removeDragListeners(): void {
     window.removeEventListener('pointermove', this._boundPointerMove);
     window.removeEventListener('pointerup', this._boundPointerUp);
+    window.removeEventListener('pointercancel', this._boundPointerCancel);
   }
 
   private _setupImageObserver(): void {
@@ -87,9 +89,32 @@ export class VehiclePanel extends LitElement {
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      border-radius: 16px;
-      background: var(--vehicle-panel-bg, transparent);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at top center, rgba(69, 114, 153, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(17, 27, 39, 0.78), rgba(9, 16, 24, 0.86));
       min-height: 400px;
+    }
+    .mode-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(72, 192, 255, 0.16);
+      background: rgba(72, 192, 255, 0.08);
+      color: rgba(224, 244, 255, 0.92);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .mode-banner strong {
+      color: #fff;
+      font-weight: 700;
+    }
+    .mode-banner span {
+      color: rgba(210, 229, 244, 0.82);
     }
     .image-container {
       flex: 1;
@@ -98,7 +123,12 @@ export class VehiclePanel extends LitElement {
       justify-content: center;
       position: relative;
       overflow: hidden;
-      border-radius: 12px;
+      border-radius: 18px;
+      padding: 12px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+        rgba(7, 15, 24, 0.44);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     .image-stage {
       position: relative;
@@ -120,6 +150,9 @@ export class VehiclePanel extends LitElement {
     .overlay-container {
       position: absolute;
       pointer-events: none;
+    }
+    .overlay-container.editing {
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.22));
     }
     .overlay-container > * {
       pointer-events: auto;
@@ -147,26 +180,27 @@ export class VehiclePanel extends LitElement {
     }
     .vehicle-title {
       text-align: center;
-      padding: 8px 12px;
+      padding: 10px 12px;
       font-size: 13px;
-      font-weight: 500;
-      color: var(--primary-text-color, #fff);
-      background: var(--card-background-color, transparent);
-      border-radius: 8px;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: rgba(244, 247, 251, 0.96);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     .chip-zone {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      padding: 4px 8px;
+      gap: 8px;
+      padding: 2px 2px 10px;
       justify-content: center;
     }
     .chip-zone.above {
-      padding-bottom: 0;
+      padding-bottom: 10px;
     }
     .chip-zone.below {
-      padding-top: 0;
+      padding-top: 10px;
     }
   `;
 
@@ -174,6 +208,7 @@ export class VehiclePanel extends LitElement {
     this._draggingId = ev.detail.id;
     window.addEventListener('pointermove', this._boundPointerMove);
     window.addEventListener('pointerup', this._boundPointerUp);
+    window.addEventListener('pointercancel', this._boundPointerCancel);
   }
 
   private _handleWindowPointerMove(ev: PointerEvent): void {
@@ -210,6 +245,14 @@ export class VehiclePanel extends LitElement {
     this.requestUpdate();
   }
 
+  private _handleWindowPointerCancel(): void {
+    if (!this._draggingId) return;
+    delete this._previewPositions[this._draggingId];
+    this._draggingId = undefined;
+    this._removeDragListeners();
+    this.requestUpdate();
+  }
+
   render(): TemplateResult {
     const showDefault = this.config.vehicle?.show_default_image !== false;
     const imgSrc = this.config.vehicle_image || '';
@@ -234,6 +277,12 @@ export class VehiclePanel extends LitElement {
 
     return html`
       ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
+      ${editMode ? html`
+        <div class="mode-banner">
+          <strong>Drag badges to reposition them</strong>
+          <span>Release the pointer to save the new coordinates and exit edit mode.</span>
+        </div>
+      ` : ''}
       ${aboveBadges.length ? html`
         <div class="chip-zone above">
           ${aboveBadges.map(b => html`
@@ -256,7 +305,7 @@ export class VehiclePanel extends LitElement {
               <ha-icon icon="mdi:car-side"></ha-icon>
               <span>Vehicle image not configured.<br>Set <code>vehicle_image</code> in card config.</span>
             </div>
-            <div class="overlay-container"
+            <div class=${editMode ? 'overlay-container editing' : 'overlay-container'}
                  style=${this._imageBox ? `left:${this._imageBox.left}px;top:${this._imageBox.top}px;width:${this._imageBox.width}px;height:${this._imageBox.height}px;` : ''}
                  @badge-drag-start=${this._handleBadgeDragStart}>
               ${onBadges.map(b => {

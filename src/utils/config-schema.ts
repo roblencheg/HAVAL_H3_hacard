@@ -40,7 +40,7 @@ export function migrateLegacyEntitiesToBadges(raw: Partial<CardConfig>): CustomB
   if (raw.badges?.length) return normalizeBadges(raw.badges);
   if (!raw.entities) return [];
 
-  return Object.entries(raw.entities).map(([key, ent], index) => ({
+  return Object.entries(raw.entities).map(([key, ent]) => ({
     id: `legacy_${key}`,
     entity: ent.entity || '',
     name: ent.label || key,
@@ -70,7 +70,7 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
 
   const badges = migrateLegacyEntitiesToBadges(raw);
 
-  const merged: CardConfig = {
+  return {
     type: raw.type || 'custom:haval-h3-dashboard-card',
     title: raw.title || 'Haval H3',
     vehicle_image: normalizeVehicleImage(raw.vehicle_image),
@@ -85,8 +85,6 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     badges,
     display,
   };
-
-  return merged;
 }
 
 function normalizeEntityConfig(ent: Partial<EntityConfig>): EntityConfig {
@@ -136,11 +134,11 @@ export function validateConfig(config: CardConfig): string[] {
   const warnings: string[] = [];
 
   if (!config.badges || config.badges.length === 0) {
-    warnings.push('No badges configured — card will display as empty');
+    warnings.push('No badges configured - card will display as empty');
   }
 
   if (!config.map?.device_tracker && !config.map?.latitude_entity) {
-    warnings.push('No device_tracker or lat/lon entities configured — map will not show location');
+    warnings.push('No device_tracker or lat/lon entities configured - map will not show location');
   }
 
   return warnings;

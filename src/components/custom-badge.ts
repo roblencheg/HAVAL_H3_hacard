@@ -55,24 +55,32 @@ export class CustomBadge extends LitElement {
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      padding: 2px 5px;
-      border-radius: 7px;
-      background: rgba(0,0,0,0.42);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-      min-height: 17px;
-      max-width: 160px;
-      font-size: 10px;
-      line-height: 1.4;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(24, 38, 54, 0.88), rgba(10, 20, 30, 0.9));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      min-height: 42px;
+      max-width: 240px;
+      font-size: 12px;
+      line-height: 1.3;
       white-space: nowrap;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-      border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
+      box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .badge.editable {
-      cursor: move;
-      outline: 1px dashed var(--primary-color, #03a9f4);
-      outline-offset: 2px;
+      cursor: grab;
+      border-color: rgba(72, 192, 255, 0.26);
+      box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.24),
+        0 0 0 1px rgba(72, 192, 255, 0.12);
+    }
+    .badge.editable:active {
+      cursor: grabbing;
     }
     .badge.on-vehicle {
       position: absolute;
@@ -82,35 +90,52 @@ export class CustomBadge extends LitElement {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 12px;
-      height: 12px;
-      flex: 0 0 12px;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
     }
     .icon ha-icon {
-      width: 12px;
-      height: 12px;
-      --mdc-icon-size: 12px;
+      width: 16px;
+      height: 16px;
+      --mdc-icon-size: 16px;
+      color: rgba(235, 243, 251, 0.92);
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 2px;
     }
     .name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      max-width: 48px;
+      color: rgba(194, 209, 223, 0.76);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      max-width: 180px;
+    }
+    .metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 5px;
+      min-width: 0;
     }
     .value {
-      font-weight: 600;
-      font-size: 10px;
+      font-weight: 700;
+      font-size: 15px;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 64px;
+      max-width: 140px;
+      color: #fff;
     }
     .unit {
-      font-size: 8px;
-      opacity: 0.7;
+      font-size: 11px;
+      opacity: 0.78;
+      color: rgba(220, 230, 240, 0.82);
     }
   `;
 
@@ -139,11 +164,20 @@ export class CustomBadge extends LitElement {
     }
 
     return html`
-      <div class="badge${this.editable ? ' editable' : ''}${isOnVehicle ? ' on-vehicle' : ''}" style="${style}" @pointerdown=${this._handlePointerDown}>
+      <div
+        class="badge${this.editable ? ' editable' : ''}${isOnVehicle ? ' on-vehicle' : ''}"
+        style="${style}"
+        title="${name || this.badge.entity || 'Badge'}"
+        @pointerdown=${this._handlePointerDown}
+      >
         ${showIcon ? html`<span class="icon"><ha-icon .icon=${icon}></ha-icon></span>` : ''}
-        ${showName && name ? html`<span class="name">${name}</span>` : ''}
-        <span class="value">${value}</span>
-        ${showUnit && unit ? html`<span class="unit">${unit}</span>` : ''}
+        <span class="content">
+          ${showName && name ? html`<span class="name">${name}</span>` : ''}
+          <span class="metric">
+            <span class="value">${value}</span>
+            ${showUnit && unit ? html`<span class="unit">${unit}</span>` : ''}
+          </span>
+        </span>
       </div>
     `;
   }

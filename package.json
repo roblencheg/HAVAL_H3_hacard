@@ -1,7 +1,7 @@
 {
   "name": "lovelace-haval-h3-card",
-  "version": "1.4.0",
-  "description": "Lovelace custom card for Haval H3 dashboard — displays vehicle data from cesar-smart-hass and HAVAL_H3 integrations with interactive map",
+  "version": "1.5.0",
+  "description": "Lovelace custom card for Haval H3 dashboard with interactive vehicle overlays and map tracking",
   "type": "module",
   "scripts": {
     "prebuild": "node scripts/generate-default-image.mjs",
