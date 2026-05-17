@@ -19,9 +19,12 @@ export class MapPanel extends LitElement {
   static styles = css`
     :host {
       display: flex;
+      flex: 1 1 auto;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      width: 100%;
+      min-width: 0;
       border-radius: 14px;
       min-height: 400px;
     }
@@ -33,6 +36,8 @@ export class MapPanel extends LitElement {
       overflow: hidden;
       background: transparent;
       position: relative;
+      width: 100%;
+      min-width: 0;
     }
     .map-container {
       flex: 1;

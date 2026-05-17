@@ -82,11 +82,18 @@ export class HavalH3Card extends LitElement {
     }
     .panel-shell {
       display: flex;
+      flex: 1 1 auto;
       min-width: 0;
       min-height: 0;
     }
     .panel-shell.map-column {
       min-width: 360px;
+    }
+    .panel-shell > * {
+      flex: 1 1 auto;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
     }
     .error {
       display: flex;

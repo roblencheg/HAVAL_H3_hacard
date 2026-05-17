@@ -4,559 +4,352 @@
 [![Build](https://github.com/roblencheg/HAVAL_H3_hacard/actions/workflows/build.yml/badge.svg)](https://github.com/roblencheg/HAVAL_H3_hacard/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A full-screen **Lovelace custom card** for **Home Assistant** that turns your dashboard into a premium vehicle monitoring interface for **Haval H3**.
-
-![Dashboard screenshot placeholder](docs/screenshot.png)
-
-> ⚠️ **Screenshot coming soon.** Replace `docs/screenshot.png` with your own screenshot.
-
----
+Lovelace custom card for Home Assistant focused on **Haval H3**. It shows a vehicle image with configurable sensor badges and a GPS map panel next to it.
 
 ## Features
 
-- **Split-panel layout**: vehicle image on the left, interactive GPS map on the right
-- **Configurable overlay sensors**: TPMS, doors, hood, trunk, battery, fuel, temperatures — positioned directly on the vehicle image
-- **Dual integration support**: works with both [cesar-smart-hass](https://github.com/roblencheg/cesar-smart-hass) and [HAVAL_H3 (GWM RU)](https://github.com/roblencheg/HAVAL_H3) integrations
-- **Custom vehicle image**: replace with your own image
-- **20+ preset positions** for sensor overlays, plus custom percentage-based positioning
-- **Responsive**: two-column on wide screens, stacked on mobile/tablet
-- **Dark/light theme** support (auto-detect or manual)
-- **Map panel** with speed, course, and last-update summary
-- **All entities optional** — card works with any subset of sensors
-- **Visual editor** for basic configuration
-
----
+- Two-panel dashboard: vehicle on the left, map on the right
+- Configurable `badges` model for overlay and chip-style sensors
+- Drag-and-drop positioning for on-vehicle badges
+- Built-in visual editor
+- Support for custom vehicle images
+- Preset image layouts: `front` and `side_front_right`
+- Map panel with tracker or explicit latitude/longitude entities
+- Optional speed, course, and update summary below the map
+- Legacy `entities:` configs are still accepted and migrated into `badges`
 
 ## Installation
 
-### HACS (recommended)
+### HACS
 
-1. Open HACS in Home Assistant
-2. Go to "Frontend" → "Custom repositories"
-3. Add `https://github.com/roblencheg/HAVAL_H3_hacard` as a custom repository of type **Lovelace**
-4. Click "Download" on the "Haval H3 Dashboard Card"
- 5. Add the resource to your Lovelace dashboard if not auto-added:
-   - Settings → Dashboards → Resources → Add Resource
-   - URL: `/hacsfiles/HAVAL_H3_hacard/haval-h3-dashboard-card.js`
-   - Type: JavaScript Module
-   - *Note*: If HACS auto-adds the resource, use the URL shown in Settings → Dashboards → Resources.
+1. Open HACS in Home Assistant.
+2. Go to `Frontend` -> `Custom repositories`.
+3. Add `https://github.com/roblencheg/HAVAL_H3_hacard` as a repository of type `Lovelace`.
+4. Install `Haval H3 Dashboard Card`.
+5. If needed, add the resource manually:
 
-### Manual install
+```text
+URL: /hacsfiles/HAVAL_H3_hacard/haval-h3-dashboard-card.js
+Type: JavaScript Module
+```
 
-1. Download the latest `haval-h3-dashboard-card.js` from [releases](https://github.com/roblencheg/HAVAL_H3_hacard/releases)
-2. Place it into your `config/www/` directory
-3. Add the resource in Lovelace:
-   - Settings → Dashboards → Resources → Add Resource
-   - URL: `/local/haval-h3-dashboard-card.js`
-   - Type: JavaScript Module
+### Manual
 
----
+1. Download `haval-h3-dashboard-card.js` from the latest [release](https://github.com/roblencheg/HAVAL_H3_hacard/releases).
+2. Put it into `config/www/`.
+3. Add the Lovelace resource:
 
-## Vehicle Image
+```text
+URL: /local/haval-h3-dashboard-card.js
+Type: JavaScript Module
+```
 
-### Default vehicle image
+## Basic Configuration
 
-The card includes a bundled default Haval H3 image from `docs/haval_h3.png`.
-You do not need to copy the image manually.
+```yaml
+type: custom:haval-h3-dashboard-card
+title: Haval H3
+map:
+  device_tracker: device_tracker.gwm_ru_location
+badges:
+  - id: tire_fl
+    entity: sensor.gwm_ru_tire_fl_pressure
+    name: FL
+    unit: bar
+    area: on_vehicle
+    position:
+      top: 66
+      left: 77
+  - id: hood
+    entity: binary_sensor.cesar_smart_hood
+    name: Hood
+    area: on_vehicle
+    position:
+      top: 22
+      left: 50
+  - id: battery
+    entity: sensor.gwm_ru_battery_voltage
+    name: Battery
+    unit: V
+    area: below_vehicle
+```
 
-If `vehicle_image` is not set, the bundled image is used automatically.
-Old paths like `/local/haval_h3_white_sunroof.png` and `/local/haval_h3_white_side.png` are automatically replaced with the bundled image — no config change needed.
+## Configuration Reference
 
-To use your own image:
+### Root options
+
+| Key | Type | Description |
+|---|---|---|
+| `type` | string | Must be `custom:haval-h3-dashboard-card` |
+| `title` | string | Optional card title |
+| `vehicle_image` | string | Optional image path, usually `/local/...` |
+| `vehicle.name` | string | Optional name shown in the vehicle panel logic |
+| `vehicle.show_default_image` | boolean | Defaults to `true` |
+| `vehicle.image_layout` | string | `front` or `side_front_right` |
+| `layout.left_width` | number | Relative width of the vehicle column |
+| `layout.right_width` | number | Relative width of the map column |
+| `map` | object | Map configuration |
+| `badges` | array | Current badge-based sensor configuration |
+| `display` | object | Display and edit options |
+| `entities` | object | Legacy format, still supported for migration |
+
+### `map`
+
+| Key | Type | Description |
+|---|---|---|
+| `device_tracker` | string | Main tracker entity |
+| `latitude_entity` | string | Fallback latitude sensor |
+| `longitude_entity` | string | Fallback longitude sensor |
+| `speed_entity` | string | Optional speed entity |
+| `course_entity` | string | Optional course entity |
+| `updated_entity` | string | Optional timestamp/state entity for last update |
+| `zoom` | number | Map zoom, default `15` |
+| `show_accuracy` | boolean | Supported in config schema |
+| `dark_mode` | boolean | Supported in config schema |
+
+### `display`
+
+| Key | Type | Description |
+|---|---|---|
+| `show_icons` | boolean | Default badge icon visibility |
+| `show_labels` | boolean | Default badge label visibility |
+| `show_units` | boolean | Default badge unit visibility |
+| `hide_unavailable` | boolean | Hide unavailable/unknown values |
+| `hide_disabled` | boolean | Supported in defaults |
+| `status_color_rules` | boolean | Supported in defaults |
+| `theme_mode` | string | `auto`, `light`, or `dark` |
+| `unavailable_text` | string | Supported in defaults |
+| `show_entity_name_on_hover` | boolean | Supported in defaults |
+| `debug_positions` | boolean | Supported in defaults |
+| `edit_positions` | boolean | Enables drag-and-drop for on-vehicle badges |
+
+### Badge object
+
+Each item in `badges:` supports:
+
+| Key | Type | Description |
+|---|---|---|
+| `id` | string | Stable badge id |
+| `entity` | string | Home Assistant entity id |
+| `name` | string | Optional label |
+| `icon` | string | Optional icon, e.g. `mdi:battery` |
+| `unit` | string | Optional unit override |
+| `area` | string | `on_vehicle`, `above_vehicle`, or `below_vehicle` |
+| `position.top` | number | Percentage, used for `on_vehicle` badges |
+| `position.left` | number | Percentage, used for `on_vehicle` badges |
+| `precision` | number | Numeric precision |
+| `enabled` | boolean | Show/hide badge |
+| `hide_unavailable` | boolean | Badge-level override |
+| `show_icon` | boolean | Badge-level override |
+| `show_name` | boolean | Badge-level override |
+| `show_unit` | boolean | Badge-level override |
+
+## Badge Areas
+
+- `on_vehicle`: absolutely positioned over the image
+- `above_vehicle`: rendered as chips above the image
+- `below_vehicle`: rendered as chips below the image
+
+## Drag-and-Drop Positioning
+
+To reposition overlay badges:
+
+1. Open the visual editor.
+2. Enable `Edit badge positions (drag to move)`.
+3. Drag an `on_vehicle` badge on the live card.
+4. Release the pointer to save the new coordinates.
+
+Current behavior:
+
+- Only `on_vehicle` badges can be dragged
+- Position is saved into `badges[].position`
+- Edit mode automatically switches off after a successful drop
+
+## Vehicle Images
+
+If `vehicle_image` is not set, the card uses the bundled default image.
+
+Legacy image paths are automatically mapped to the bundled image:
+
+- `/local/haval_h3_white_sunroof.png`
+- `/local/haval_h3_white_side.png`
+
+Example:
 
 ```yaml
 vehicle_image: /local/my_haval_h3.png
+vehicle:
+  image_layout: side_front_right
 ```
 
-### Custom vehicle image
+### Supported image layouts
 
-Place your vehicle image in `config/www/` and reference it as `/local/your-image.png`.
-
-Choose the image that matches your `vehicle.image_layout`:
-
-| Layout | Recommended Image |
+| Layout | Description |
 |---|---|
-| `front` | Top-down or front view of the vehicle |
-| `side_front_right` | Side 3/4 view, front of the car facing right |
+| `front` | Default front/top-oriented layout |
+| `side_front_right` | Side/front-right perspective |
 
-Recommended image format: PNG with transparent background, ~800×600 px.
+## Visual Editor
 
----
+The built-in editor currently supports:
 
-## Configuration
+- card title
+- vehicle image path
+- badge add/remove/edit
+- badge area selection
+- badge position reset
+- map entities
+- display flags
+- drag mode toggle
 
-> **Important**: Entity IDs shown below are examples. Your actual entity IDs may differ depending on your integration configuration and device names. Check your Home Assistant **Settings → Devices & Services** for the exact entity IDs created by cesar-smart-hass and HAVAL_H3 integrations.
+The editor works with the current `badges` format. It also normalizes incoming config through the same schema as the runtime card.
 
-### Configuring sensors in visual editor
+## Legacy `entities` Support
 
-The card includes a built-in visual editor for sensor configuration:
-
-1. Open the card in the Lovelace dashboard editor
-2. In the **Vehicle Sensors** section you will find groups:
-   - TPMS / Tires
-   - Doors & Openings
-   - Power & Engine
-   - Security
-   - Climate
-   - Info / Telemetry
-3. For each sensor you can:
-   - **Toggle** enabled/disabled with the checkbox
-   - **Select an entity** using the entity picker (or type manually)
-   - **Set a label** (e.g. "FL", "FR")
-   - **Set a unit** (e.g. "bar", "°C")
-   - **Choose a position** on the vehicle image
-   - **Set precision** (number of decimal places for numeric sensors)
-4. Use **"Add default Haval H3 sensor layout"** to populate all sensors with default labels, units and positions
-5. Use **"Try auto-detect entities"** to automatically find matching entities from your Home Assistant instance
-
-> Sensors with empty entity fields or disabled state are hidden on the card.
-
-### Manual YAML sensor configuration
-
-For full control, you can configure sensors directly in YAML:
+Older configs that use:
 
 ```yaml
 entities:
-  battery:
-    enabled: true
-    label: Battery
-    unit: V
-    position: battery_area
-    precision: 1
-    entity: sensor.battery_voltage
+  some_sensor:
+    entity: sensor.example
 ```
 
-### Minimal Configuration
+are still accepted. On load, they are migrated internally into `badges`.
+
+Notes:
+
+- legacy `render_area: vehicle` becomes `area: on_vehicle`
+- other legacy entries become `area: below_vehicle`
+- legacy `custom_position` maps into badge `position`
+
+For new configs, use `badges`.
+
+## Example: Full Current Config
 
 ```yaml
 type: custom:haval-h3-dashboard-card
 title: Haval H3
-vehicle_image: /local/haval_h3_white_sunroof.png
-```
-
-### Minimal Configuration with Map
-
-```yaml
-type: custom:haval-h3-dashboard-card
-title: Haval H3
-vehicle_image: /local/haval_h3_white_sunroof.png
-map:
-  device_tracker: device_tracker.cesar_smart_vehicle
-```
-
-### Full Configuration
-
-```yaml
-type: custom:haval-h3-dashboard-card
-title: Haval H3
-vehicle_image: /local/haval_h3_white_sunroof.png
+vehicle_image: /local/haval_h3.png
 vehicle:
   name: My Haval H3
   show_default_image: true
+  image_layout: side_front_right
 layout:
-  left_width: 50
-  right_width: 50
+  left_width: 55
+  right_width: 45
 map:
-  device_tracker: device_tracker.cesar_smart_vehicle
+  device_tracker: device_tracker.gwm_ru_location
   speed_entity: sensor.location_speed
   course_entity: sensor.location_course
   updated_entity: sensor.last_update
   zoom: 15
-  show_accuracy: false
-entities:
-  # --- Tire Pressure (TPMS) from HAVAL_H3 ---
-  front_left_tire_pressure:
+badges:
+  - id: tire_fl
     entity: sensor.gwm_ru_tire_fl_pressure
-    enabled: true
-    label: FL
+    name: FL
     unit: bar
-    position: front_left_wheel
-  front_right_tire_pressure:
+    area: on_vehicle
+    position:
+      top: 65
+      left: 78
+    precision: 1
+  - id: tire_fr
     entity: sensor.gwm_ru_tire_fr_pressure
-    enabled: true
-    label: FR
+    name: FR
     unit: bar
-    position: front_right_wheel
-  rear_left_tire_pressure:
+    area: on_vehicle
+    position:
+      top: 82
+      left: 78
+    precision: 1
+  - id: tire_rl
     entity: sensor.gwm_ru_tire_rl_pressure
-    enabled: true
-    label: RL
+    name: RL
     unit: bar
-    position: rear_left_wheel
-  rear_right_tire_pressure:
+    area: on_vehicle
+    position:
+      top: 65
+      left: 22
+    precision: 1
+  - id: tire_rr
     entity: sensor.gwm_ru_tire_rr_pressure
-    enabled: true
-    label: RR
+    name: RR
     unit: bar
-    position: rear_right_wheel
-
-  # --- Tire Temperature (optional, from HAVAL_H3) ---
-  front_left_tire_temp:
-    entity: sensor.gwm_ru_tire_fl_temp
-    enabled: false
-    label: FL °C
-    unit: °C
-    position: front_left_wheel_secondary
-  front_right_tire_temp:
-    entity: sensor.gwm_ru_tire_fr_temp
-    enabled: false
-    label: FR °C
-    unit: °C
-    position: front_right_wheel_secondary
-  rear_left_tire_temp:
-    entity: sensor.gwm_ru_tire_rl_temp
-    enabled: false
-    label: RL °C
-    unit: °C
-    position: rear_left_wheel_secondary
-  rear_right_tire_temp:
-    entity: sensor.gwm_ru_tire_rr_temp
-    enabled: false
-    label: RR °C
-    unit: °C
-    position: rear_right_wheel_secondary
-
-  # --- Doors / Body (from cesar-smart-hass) ---
-  hood:
-    entity: binary_sensor.hood
-    enabled: true
-    position: hood
-  trunk:
-    entity: binary_sensor.trunk
-    enabled: true
-    position: trunk
-  door_front_left:
-    entity: binary_sensor.door_front_left
-    enabled: true
-    position: door_front_left
-  door_front_right:
-    entity: binary_sensor.door_front_right
-    enabled: true
-    position: door_front_right
-  door_back_left:
-    entity: binary_sensor.door_back_left
-    enabled: true
-    position: door_back_left
-  door_back_right:
-    entity: binary_sensor.door_back_right
-    enabled: true
-    position: door_back_right
-
-  # --- Vehicle Status (from cesar-smart-hass) ---
-  ignition:
-    entity: binary_sensor.ignition
-    enabled: true
-    position: dashboard
-  engine_state:
-    entity: sensor.engine_state
-    enabled: true
-    position: engine
-  security_mode:
-    entity: sensor.security_mode
-    enabled: true
-    position: roof
-
-  # --- Fuel & Battery (from cesar-smart-hass) ---
-  fuel:
-    entity: sensor.fuel_level
-    enabled: true
-    label: Fuel
-    unit: L
-    position: fuel_area
-  battery:
-    entity: sensor.battery_voltage
-    enabled: true
-    label: Bat
+    area: on_vehicle
+    position:
+      top: 82
+      left: 22
+    precision: 1
+  - id: hood
+    entity: binary_sensor.cesar_smart_hood
+    name: Hood
+    area: on_vehicle
+    position:
+      top: 37
+      left: 78
+  - id: battery
+    entity: sensor.gwm_ru_battery_voltage
+    name: Battery
     unit: V
-    position: battery_area
-
-  # --- Mileage & Temperatures (from cesar-smart-hass) ---
-  mileage:
-    entity: sensor.mileage
-    enabled: true
-    label: Odometer
+    area: below_vehicle
+    precision: 1
+  - id: mileage
+    entity: sensor.gwm_ru_mileage_total
+    name: Odometer
     unit: km
-    position: info_block
-  outdoor_temp:
-    entity: sensor.outdoor_temperature
-    enabled: true
-    label: Outside
-    unit: °C
-    position: front_center
-  cabin_temp:
-    entity: sensor.cabin_temperature
-    enabled: true
-    label: Cabin
-    unit: °C
-    position: center_console
-
+    area: below_vehicle
 display:
   show_icons: true
   show_labels: true
   show_units: true
   hide_unavailable: true
-  hide_disabled: true
-  status_color_rules: true
-  theme_mode: auto
-  unavailable_text: "\u2014"
+  edit_positions: false
 ```
-
-> **Note**: Entity IDs shown above do NOT include the `cesar_smart_` prefix (e.g. `binary_sensor.hood` vs `binary_sensor.cesar_smart_hood`). The actual entity ID in your system depends on what name the integration assigned during setup. Check your Home Assistant **Developer Tools → States** for the exact entity IDs.
-
----
-
-## Preset Positions
-
-These named positions can be used in `position:` for any entity:
-
-| Position | Description |
-|---|---|
-| `front_left_wheel` | Front left wheel (TPMS pressure) |
-| `front_right_wheel` | Front right wheel (TPMS pressure) |
-| `rear_left_wheel` | Rear left wheel (TPMS pressure) |
-| `rear_right_wheel` | Rear right wheel (TPMS pressure) |
-| `front_left_wheel_secondary` | Below FL wheel (TPMS temperature) |
-| `front_right_wheel_secondary` | Below FR wheel (TPMS temperature) |
-| `rear_left_wheel_secondary` | Below RL wheel (TPMS temperature) |
-| `rear_right_wheel_secondary` | Below RR wheel (TPMS temperature) |
-| `hood` | Hood area |
-| `engine` | Engine bay |
-| `roof` | Roof/sunroof area |
-| `windshield` | Windshield |
-| `dashboard` | Dashboard area |
-| `center_console` | Center console |
-| `fuel_area` | Fuel area |
-| `battery_area` | Battery area |
-| `trunk` | Trunk |
-| `front_center` | Front center |
-| `rear_center` | Rear center |
-| `info_block` | Info panel area |
-| `door_front_left` | Front left door |
-| `door_front_right` | Front right door |
-| `door_back_left` | Rear left door |
-| `door_back_right` | Rear right door |
-
-### Image Layout Presets
-
-The card supports different vehicle image layouts that remap all preset positions automatically.
-
-Set `vehicle.image_layout` to switch between views:
-
-```yaml
-type: custom:haval-h3-dashboard-card
-vehicle:
-  image_layout: side_front_right
-vehicle_image: /local/haval_h3.png
-```
-
-| Layout | Description |
-|---|---|
-| `front` | Front/top-down view (default) |
-| `side_front_right` | 3/4 side view, car facing right |
-
-When using `side_front_right`, all `position:` values (e.g. `hood`, `trunk`, `front_left_wheel`) are automatically adjusted to match the side perspective.
-
----
-
-### Debug Mode
-
-Set `display.debug_positions: true` to overlay a 10% grid and position markers — useful for fine-tuning coordinates.
-
-```yaml
-display:
-  debug_positions: true
-```
-
----
-
-### Custom Positioning
-
-Use `custom_position` for pixel-perfect placement:
-
-```yaml
-entities:
-  my_sensor:
-    entity: sensor.my_sensor
-    custom_position:
-      top: 45
-      left: 30
-```
-
-Coordinates are in **percentages** relative to the image container.
-
----
-
-## Entity Mapping by Integration
-
-> The entity IDs below are the **default names** generated by each integration. If you have multiple config entries or custom names, the actual entity_id may have prefixes/suffixes. Always verify in Developer Tools → States.
-
-### From `cesar-smart-hass`
-
-Entities are created under the device "Cesar Smart ReadOnly". The default entity_id prefix is `cesar_smart_`.
-
-| Entity ID | Description |
-|---|---|
-| `sensor.cesar_smart_engine_state` | Engine state |
-| `sensor.cesar_smart_security_mode` | Security/alarm mode |
-| `sensor.cesar_smart_fuel_level` | Fuel level |
-| `sensor.cesar_smart_mileage` | Mileage (km) |
-| `sensor.cesar_smart_battery_voltage` | Battery voltage |
-| `sensor.cesar_smart_engine_temperature` | Engine coolant temp |
-| `sensor.cesar_smart_cabin_temperature` | Cabin temperature |
-| `sensor.cesar_smart_outdoor_temperature` | Outdoor temperature |
-| `sensor.cesar_smart_left_side_temperature` | Left side temp (disabled by default) |
-| `sensor.cesar_smart_right_side_temperature` | Right side temp (disabled by default) |
-| `sensor.cesar_smart_location_speed` | GPS speed (km/h) |
-| `sensor.cesar_smart_location_course` | GPS course (degrees, disabled by default) |
-| `sensor.cesar_smart_last_update` | Last data update timestamp |
-| `binary_sensor.cesar_smart_ignition` | Ignition on/off |
-| `binary_sensor.cesar_smart_hood` | Hood open/closed |
-| `binary_sensor.cesar_smart_door_front_left` | Front left door |
-| `binary_sensor.cesar_smart_door_front_right` | Front right door |
-| `binary_sensor.cesar_smart_door_back_left` | Rear left door |
-| `binary_sensor.cesar_smart_door_back_right` | Rear right door |
-| `binary_sensor.cesar_smart_trunk` | Trunk open/closed |
-| `binary_sensor.cesar_smart_engine_running` | Engine running |
-| `device_tracker.cesar_smart_vehicle` | GPS location (default name) |
-
-### From `HAVAL_H3` (GWM RU)
-
-Entities are created under the device "GWM RU". The prefix is `gwm_ru`.
-
-| Entity ID | Description |
-|---|---|
-| `sensor.gwm_ru_range_km` | Driving range |
-| `sensor.gwm_ru_fuel_liters` | Fuel volume |
-| `sensor.gwm_ru_mileage_total` | Total mileage |
-| `sensor.gwm_ru_tire_fl_pressure` | Front left tire pressure (атм) |
-| `sensor.gwm_ru_tire_fl_temp` | Front left tire temp (°C) |
-| `sensor.gwm_ru_tire_fr_pressure` | Front right tire pressure |
-| `sensor.gwm_ru_tire_fr_temp` | Front right tire temp |
-| `sensor.gwm_ru_tire_rl_pressure` | Rear left tire pressure |
-| `sensor.gwm_ru_tire_rl_temp` | Rear left tire temp |
-| `sensor.gwm_ru_tire_rr_pressure` | Rear right tire pressure |
-| `sensor.gwm_ru_tire_rr_temp` | Rear right tire temp |
-| `sensor.gwm_ru_engine_coolant_temp` | Engine coolant temp |
-| `sensor.gwm_ru_ambient_temperature` | Ambient temperature |
-| `sensor.gwm_ru_battery_voltage` | Battery voltage |
-| `sensor.gwm_ru_vehicle_battery` | Battery level |
-| `sensor.gwm_ru_brand` | Vehicle brand |
-| `sensor.gwm_ru_model` | Vehicle model |
-| `sensor.gwm_ru_color` | Vehicle color |
-| `sensor.gwm_ru_oil_qty` | Oil level |
-| `sensor.gwm_ru_service_status` | Service status |
-| `sensor.gwm_ru_tbox_status` | TBOX status |
-| `binary_sensor.gwm_ru_tbox_online` | TBOX online |
-| `device_tracker.gwm_ru_location` | GPS location |
-
----
-
-## Color Rules
-
-You can define custom color rules per entity:
-
-```yaml
-entities:
-  battery:
-    entity: sensor.battery_voltage
-    position: battery_area
-    color_rules:
-      - state: 12.0
-        operator: lt
-        color: "#f44336"    # Red when low
-      - state: 12.5
-        operator: lt
-        color: "#ff9800"    # Orange when medium
-```
-
-Supported operators: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
-
----
 
 ## Responsive Behavior
 
 | Viewport | Layout |
 |---|---|
-| ≥768px wide | Two columns side by side |
-| <768px wide | Stacked (vehicle above, map below) |
-| Narrow dashboard | Auto-adjusts, scrollable |
-
----
+| `>= 768px` | Vehicle and map side by side |
+| `< 768px` | Stacked vertically |
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Build
 npm run build
-
-# Watch mode
 npm run watch
-
-# Typecheck
 npm run typecheck
-
-# Check version sync (package.json vs src/const.ts)
+npm test
 npm run check:version
 ```
 
-### Release checklist
+## Project Structure
 
-1. Ensure `npm run check:version` passes (package.json and src/const.ts versions match)
-2. Ensure `npm run typecheck` and `npm run build` pass locally
-3. Commit and push to `main`
-4. Verify the Build action is green on GitHub
-5. Create a GitHub Release with tag `v<version>` (e.g. `v1.3.0`)
-6. After the release is created, trigger the **Release** action manually via **Actions → Release → Run workflow`
-   — this uploads `haval-h3-dashboard-card.js` to the release assets
-
-> HACS can also fetch `haval-h3-dashboard-card.js` directly from the repository source archive, so the release asset is optional.
-
-### Project Structure
-
+```text
+src/
+  index.ts
+  haval-h3-card.ts
+  editor.ts
+  types.ts
+  const.ts
+  components/
+    vehicle-panel.ts
+    map-panel.ts
+    custom-badge.ts
+  utils/
+    config-schema.ts
+    position-resolver.ts
+    entity-resolver.ts
 ```
-haval-h3-dashboard-card/
-├── src/
-│   ├── index.ts              # Entry point, card registration
-│   ├── haval-h3-card.ts      # Main card component
-│   ├── editor.ts             # Visual config editor
-│   ├── types.ts              # TypeScript interfaces
-│   ├── const.ts              # Constants, integration entity maps
-│   ├── components/
-│   │   ├── vehicle-panel.ts  # Left panel (image + overlays)
-│   │   ├── map-panel.ts      # Right panel (map + summary)
-│   │   └── overlay-badge.ts  # Individual sensor overlay
-│   └── utils/
-│       ├── entity-resolver.ts   # Entity state resolution
-│       ├── position-resolver.ts # Position calculation
-│       └── config-schema.ts     # Config validation & merge
-├── dist/                     # Built output
-├── docs/
-│   ├── haval_h3_white_sunroof.svg  # Placeholder vehicle image
-│   └── screenshot.png         # (add your own)
-├── hacs.json
-├── package.json
-├── tsconfig.json
-├── rollup.config.js
-├── LICENSE
-└── README.md
-```
-
----
 
 ## Known Limitations
 
-- **This card is read-only** — it displays data only. No vehicle control (lock/unlock, remote start, etc.)
-- The vehicle image is a **placeholder SVG**. Replace with a real top-down photo for best results
-- Map uses Home Assistant's built-in `<ha-map>` element, which requires the map integration to be configured in HA
-- If `map.device_tracker` is not configured, the map will show a placeholder. Latitude/longitude sensors are supported as a fallback
-- Some Cesar Smart entities are **disabled by default** in the integration — enable them in Settings → Devices & Services → Cesar Smart ReadOnly
-- Entity IDs may vary if you have multiple instances of an integration or custom names
-- The `cesar_smart_` prefix is the default; your actual entity IDs may differ — always verify in Developer Tools → States
-
----
+- The card is read-only. It does not send control commands to the vehicle.
+- Map rendering depends on Home Assistant's built-in `ha-map`.
+- Without `device_tracker` or `latitude_entity` + `longitude_entity`, the map panel shows a placeholder.
+- Badge positioning is percentage-based relative to the rendered vehicle image area.
+- Some old README examples on the internet may still use the legacy `entities` format.
 
 ## License
 

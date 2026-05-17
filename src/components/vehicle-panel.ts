@@ -86,9 +86,12 @@ export class VehiclePanel extends LitElement {
   static styles = css`
     :host {
       display: flex;
+      flex: 1 1 auto;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      width: 100%;
+      min-width: 0;
       border-radius: 14px;
       background: transparent;
       min-height: 400px;
