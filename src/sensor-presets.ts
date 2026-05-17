@@ -297,6 +297,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     summary_order: 105,
     aliases: [
       'akkumuliator', 'аккумулятор', 'battery', 'vehicle_battery',
+      'cesar_smart_battery', 'lavash_battery',
     ],
   },
   {
@@ -312,7 +313,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     overlay_priority: 10,
     aliases: [
       'voltazh_akkumuliatora', 'voltazh', 'battery_voltage', 'voltage', 'вольтаж аккумулятора',
-      'haval_h3_battery_voltage',
+      'haval_h3_battery_voltage', 'akkumuliator_voltazh',
+      'cesar_smart_battery_voltage', 'lavash_battery_voltage',
     ],
   },
   {
@@ -457,7 +459,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     overlay_priority: 10,
     aliases: [
       'temperatura_vozdukha', 'outdoor_temperature', 'ambient_temperature', 'температура воздуха',
-      'haval_h3_outdoor_temperature',
+      'haval_h3_outdoor_temperature', 'outdoor_temp',
+      'cesar_smart_outdoor_temperature', 'lavash_outdoor_temperature',
     ],
   },
   {
@@ -472,7 +475,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     overlay_priority: 10,
     aliases: [
       'temperatura_dvigatelia', 'engine_temperature', 'coolant_temperature', 'температура двигателя',
-      'haval_h3_engine_temperature',
+      'haval_h3_engine_temperature', 'engine_temp', 'coolant_temp',
+      'cesar_smart_engine_temperature', 'lavash_engine_temperature',
     ],
   },
   {

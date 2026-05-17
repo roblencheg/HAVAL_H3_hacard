@@ -9,12 +9,12 @@ describe('overlay-badge compact CSS', () => {
     expect(source).toContain('padding: 2px 5px');
   });
 
-  it('uses compact border-radius (8px)', () => {
-    expect(source).toContain('border-radius: 8px');
+  it('uses compact border-radius (7px)', () => {
+    expect(source).toContain('border-radius: 7px');
   });
 
-  it('uses dark semi-transparent background (rgba(0, 0, 0, 0.48))', () => {
-    expect(source).toContain('rgba(0, 0, 0, 0.48)');
+  it('uses dark semi-transparent background (rgba(0, 0, 0, 0.42))', () => {
+    expect(source).toContain('rgba(0, 0, 0, 0.42)');
   });
 
   it('uses backdrop-filter blur(3px)', () => {
@@ -25,8 +25,8 @@ describe('overlay-badge compact CSS', () => {
     expect(source).toContain('font-size: 10px');
   });
 
-  it('uses compact min-height (18px)', () => {
-    expect(source).toContain('min-height: 18px');
+  it('uses compact min-height (17px)', () => {
+    expect(source).toContain('min-height: 17px');
   });
 
   it('uses compact max-width (130px)', () => {

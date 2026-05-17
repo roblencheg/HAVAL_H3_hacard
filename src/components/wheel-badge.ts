@@ -66,8 +66,8 @@ export class WheelBadge extends LitElement {
       align-items: center;
       gap: 3px;
       padding: 2px 5px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.48);
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.42);
       backdrop-filter: blur(3px);
       -webkit-backdrop-filter: blur(3px);
       font-size: 10px;
@@ -76,7 +76,7 @@ export class WheelBadge extends LitElement {
       white-space: nowrap;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
-      min-height: 18px;
+      min-height: 17px;
     }
     .wheel-badge.editable {
       cursor: move;
@@ -119,11 +119,16 @@ export class WheelBadge extends LitElement {
     const pressureIcon = this.pressureEntity ? getEntityIcon(this.pressureEntity, this.pressureConfig || this.pressureEntity.config) : null;
     const tempIcon = this.tempEntity ? getEntityIcon(this.tempEntity, this.tempConfig || this.tempEntity.config) : null;
 
-    const pressureValue = this.pressureEntity && this.display.show_units
-      ? formatEntityValue(this.pressureEntity, this.pressureConfig || this.pressureEntity.config, this.display)
+    const showUnits = this.display.show_units;
+    const pressureValue = this.pressureEntity
+      ? (showUnits
+        ? formatEntityValue(this.pressureEntity, this.pressureConfig || this.pressureEntity.config, this.display) + ' bar'
+        : formatEntityValue(this.pressureEntity, this.pressureConfig || this.pressureEntity.config, this.display))
       : null;
-    const tempValue = this.tempEntity && this.display.show_units
-      ? formatEntityValue(this.tempEntity, this.tempConfig || this.tempEntity.config, this.display)
+    const tempValue = this.tempEntity
+      ? (showUnits
+        ? formatEntityValue(this.tempEntity, this.tempConfig || this.tempEntity.config, this.display) + '\u00B0'
+        : formatEntityValue(this.tempEntity, this.tempConfig || this.tempEntity.config, this.display))
       : null;
 
     const effectiveConfig: EntityConfig = {

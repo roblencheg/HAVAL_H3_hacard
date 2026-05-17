@@ -25,8 +25,8 @@ export class OverlayBadge extends LitElement {
       align-items: center;
       gap: 3px;
       padding: 2px 5px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.48);
+      border-radius: 7px;
+      background: rgba(0, 0, 0, 0.42);
       backdrop-filter: blur(3px);
       -webkit-backdrop-filter: blur(3px);
       font-size: 10px;
@@ -37,7 +37,7 @@ export class OverlayBadge extends LitElement {
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
       transform: none;
       max-width: 130px;
-      min-height: 18px;
+      min-height: 17px;
       overflow: hidden;
     }
     .badge:hover {

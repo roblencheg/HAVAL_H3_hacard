@@ -159,8 +159,9 @@ export class HavalH3Card extends LitElement {
     if (wheelKey) {
       const [pKey, tKey] = getWheelTargetKeys(wheelKey);
       for (const targetKey of [pKey, tKey]) {
+        if (!config.entities[targetKey]) continue;
         config.entities[targetKey] = {
-          ...(config.entities[targetKey] || {}),
+          ...config.entities[targetKey],
           custom_position,
         };
       }
@@ -171,7 +172,7 @@ export class HavalH3Card extends LitElement {
       };
     }
 
-    this.config = config;
+    this.config = mergeConfig(config);
 
     this.dispatchEvent(new CustomEvent('config-changed', {
       detail: { config },

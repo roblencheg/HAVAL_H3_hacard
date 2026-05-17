@@ -5,10 +5,11 @@ import { resolveEntity, showEntity } from '../utils/entity-resolver';
 import { mergeConfig } from '../utils/config-schema';
 import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
-import { clampPercentage } from '../utils/position-resolver';
+import { clampPercentage, resolvePosition } from '../utils/position-resolver';
 import { WheelKey, WHEEL_LABELS, WHEEL_POSITION_KEYS, getWheelGroupKey, getWheelTargetKeys } from './wheel-badge';
 import './overlay-badge';
 import './wheel-badge';
+import './battery-badge';
 import './summary-panel';
 
 interface HassEntity {
@@ -27,7 +28,6 @@ const VEHICLE_ALLOWED_KEYS = new Set([
   'door_front_right',
   'door_back_left',
   'door_back_right',
-  'battery_voltage',
   'fuel',
   'cabin_temp',
   'outdoor_temp',
@@ -47,6 +47,8 @@ const TIRE_KEYS = new Set([
   'rear_right_tire_temp',
 ]);
 
+const BATTERY_KEYS = new Set(['battery_voltage', 'battery']);
+
 interface WheelGroup {
   wheelKey: WheelKey;
   pressureEntity: ResolvedEntity | null;
@@ -55,24 +57,67 @@ interface WheelGroup {
   tempConfig: EntityConfig | null;
 }
 
+interface GhostEntry {
+  key: string;
+  label: string;
+  pos: PositionConfig | null;
+  reason: string;
+}
+
 export class VehiclePanel extends LitElement {
   @property({ attribute: false }) config!: CardConfig;
   @property({ attribute: false }) hass!: HassState;
 
   private _draggingKey?: string;
   private _previewPositions: Record<string, { top: number; left: number }> = {};
+  private _imageBox: { left: number; top: number; width: number; height: number } | null = null;
+  private _resizeObserver: ResizeObserver | null = null;
 
   private _boundPointerMove = this._handleWindowPointerMove.bind(this);
   private _boundPointerUp = this._handleWindowPointerUp.bind(this);
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
     this._removeDragListeners();
+  }
+
+  firstUpdated(): void {
+    this._setupImageObserver();
   }
 
   private _removeDragListeners(): void {
     window.removeEventListener('pointermove', this._boundPointerMove);
     window.removeEventListener('pointerup', this._boundPointerUp);
+  }
+
+  private _setupImageObserver(): void {
+    const stage = this.renderRoot.querySelector('.image-stage') as HTMLElement | null;
+    if (!stage) return;
+    this._resizeObserver = new ResizeObserver(() => this._updateImageBox());
+    this._resizeObserver.observe(stage);
+    const img = this.renderRoot.querySelector('.vehicle-img') as HTMLImageElement | null;
+    if (img) {
+      this._resizeObserver.observe(img);
+    }
+  }
+
+  private _updateImageBox(): void {
+    const stage = this.renderRoot.querySelector('.image-stage') as HTMLElement | null;
+    const img = this.renderRoot.querySelector('.vehicle-img') as HTMLImageElement | null;
+    if (!stage || !img) {
+      this._imageBox = null;
+      return;
+    }
+    const stageRect = stage.getBoundingClientRect();
+    const imgRect = img.getBoundingClientRect();
+    this._imageBox = {
+      left: imgRect.left - stageRect.left,
+      top: imgRect.top - stageRect.top,
+      width: imgRect.width,
+      height: imgRect.height,
+    };
   }
 
   static styles = css`
@@ -113,7 +158,6 @@ export class VehiclePanel extends LitElement {
     }
     .overlay-container {
       position: absolute;
-      inset: 0;
       pointer-events: none;
     }
     .overlay-container > * {
@@ -175,6 +219,19 @@ export class VehiclePanel extends LitElement {
       border-radius: 8px;
       margin-bottom: 4px;
     }
+    .ghost-badge {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      padding: 2px 5px;
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.25);
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      pointer-events: none;
+      z-index: 5;
+      white-space: nowrap;
+    }
   `;
 
   getResolvedEntities(): ResolvedEntity[] {
@@ -186,6 +243,7 @@ export class VehiclePanel extends LitElement {
     const resolved: ResolvedEntity[] = [];
     for (const [key, ent] of Object.entries(entities)) {
       if (TIRE_KEYS.has(key)) continue;
+      if (BATTERY_KEYS.has(key)) continue;
       const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(key)?.render_area;
       if (renderArea && renderArea !== 'vehicle') continue;
       if (!VEHICLE_ALLOWED_KEYS.has(key) && !ent.force_vehicle) continue;
@@ -240,6 +298,68 @@ export class VehiclePanel extends LitElement {
       const tempConfig = tempEntity ? (entities[tKey] as EntityConfig) || null : null;
       return { wheelKey: wk, pressureEntity, tempEntity, pressureConfig, tempConfig };
     }).filter((g) => g.pressureEntity || g.tempEntity);
+  }
+
+  private _getBatteryBadge(): { primaryEntity: ResolvedEntity | null; fallbackEntity: ResolvedEntity | null; config: EntityConfig | null } {
+    const merged = mergeConfig(this.config as unknown as Partial<CardConfig>);
+    const entities = merged.entities;
+    const display = merged.display!;
+    if (!entities) return { primaryEntity: null, fallbackEntity: null, config: null };
+
+    const primaryConfig = entities['battery_voltage'];
+    const fallbackConfig = entities['battery'];
+
+    let primaryEntity: ResolvedEntity | null = null;
+    if (primaryConfig) {
+      primaryEntity = resolveEntity(this.hass as any, primaryConfig, display);
+      if (primaryEntity) primaryEntity.key = 'battery_voltage';
+      if (!showEntity(primaryEntity, display)) primaryEntity = null;
+    }
+
+    let fallbackEntity: ResolvedEntity | null = null;
+    if (fallbackConfig) {
+      fallbackEntity = resolveEntity(this.hass as any, fallbackConfig, display);
+      if (fallbackEntity) fallbackEntity.key = 'battery';
+      if (!showEntity(fallbackEntity, display)) fallbackEntity = null;
+    }
+
+    const activeConfig = primaryConfig || fallbackConfig;
+    return { primaryEntity, fallbackEntity, config: activeConfig || null };
+  }
+
+  private _getGhostEntities(vehicleEntities: ResolvedEntity[], wheelGroups: WheelGroup[], batteryInfo: { primaryEntity: ResolvedEntity | null; fallbackEntity: ResolvedEntity | null }): GhostEntry[] {
+    const ghosts: GhostEntry[] = [];
+    const merged = mergeConfig(this.config as unknown as Partial<CardConfig>);
+    const entities = merged.entities;
+    if (!entities) return ghosts;
+
+    const resolvedKeys = new Set<string>();
+    for (const e of vehicleEntities) {
+      if (e.key) resolvedKeys.add(e.key);
+    }
+    for (const g of wheelGroups) {
+      resolvedKeys.add(getWheelGroupKey(g.wheelKey));
+    }
+    if (batteryInfo.primaryEntity?.key) resolvedKeys.add(batteryInfo.primaryEntity.key);
+    if (batteryInfo.fallbackEntity?.key) resolvedKeys.add(batteryInfo.fallbackEntity.key);
+
+    for (const [key, ent] of Object.entries(entities)) {
+      if (TIRE_KEYS.has(key)) continue;
+      if (resolvedKeys.has(key)) continue;
+      const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(key)?.render_area;
+      if (renderArea !== 'vehicle') continue;
+      if (!VEHICLE_ALLOWED_KEYS.has(key) && !ent.force_vehicle) continue;
+      const preset = SENSOR_PRESETS_BY_KEY.get(key);
+      const reason = ent.entity ? `entity "${ent.entity}" is unavailable or hidden` : `no HA entity configured for "${key}"`;
+      const pos = resolvePosition({
+        position: ent.position || preset?.position,
+        imageLayout: this.config.vehicle?.image_layout,
+      });
+      ghosts.push({ key, label: preset?.label || key, pos, reason });
+      console.warn(`[haval-h3] Ghost badge for "${key}": ${reason}`);
+    }
+
+    return ghosts;
   }
 
   private _handleBadgeDragStart(ev: CustomEvent): void {
@@ -305,6 +425,7 @@ export class VehiclePanel extends LitElement {
       const currentSrc = target.currentSrc || target.src;
       if (currentSrc !== DEFAULT_VEHICLE_IMAGE) {
         target.src = DEFAULT_VEHICLE_IMAGE;
+        target.addEventListener('load', () => this._updateImageBox(), { once: true });
       } else {
         target.style.display = 'none';
         target.parentElement?.querySelector('.no-image')?.classList.remove('hidden');
@@ -313,6 +434,8 @@ export class VehiclePanel extends LitElement {
 
     const vehicleEntities = this.getResolvedEntities();
     const wheelGroups = this._getWheelGroups();
+    const batteryInfo = this._getBatteryBadge();
+    const ghostEntities = isDebug ? this._getGhostEntities(vehicleEntities, wheelGroups, batteryInfo) : [];
     const positionGroups = new Map<string, ResolvedEntity[]>();
     for (const entity of vehicleEntities) {
       const pos = entity.config.position || 'default';
@@ -326,12 +449,15 @@ export class VehiclePanel extends LitElement {
         ${hasImage ? html`
           <div class="image-stage">
             <img class="vehicle-img" src="${imgSrc}" alt="${this.config.vehicle?.name || 'Vehicle'}" 
-                 @error=${handleImgError} />
+                 @error=${handleImgError}
+                 @load=${this._updateImageBox} />
             <div class="no-image hidden">
               <ha-icon icon="mdi:car-side"></ha-icon>
               <span>Vehicle image not configured.<br>Set <code>vehicle_image</code> in card config.</span>
             </div>
-            <div class="overlay-container" @badge-drag-start=${this._handleBadgeDragStart}>
+            <div class="overlay-container" 
+                 style=${this._imageBox ? `left:${this._imageBox.left}px;top:${this._imageBox.top}px;width:${this._imageBox.width}px;height:${this._imageBox.height}px;` : ''}
+                 @badge-drag-start=${this._handleBadgeDragStart}>
               ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
               ${wheelGroups.map((group) => {
                 const groupKey = getWheelGroupKey(group.wheelKey);
@@ -351,6 +477,16 @@ export class VehiclePanel extends LitElement {
                   ></wheel-badge>
                 `;
               })}
+              ${(batteryInfo.primaryEntity || batteryInfo.fallbackEntity) ? html`
+                <battery-badge
+                  .primaryEntity=${batteryInfo.primaryEntity || undefined}
+                  .fallbackEntity=${batteryInfo.fallbackEntity || undefined}
+                  .entityConfig=${batteryInfo.config || undefined}
+                  .display=${this.config.display || {}}
+                  .cardConfig=${this.config}
+                  .editable=${editMode}
+                ></battery-badge>
+              ` : ''}
               ${Array.from(positionGroups.entries()).map(([_pos, entities]) => {
                 const count = entities.length;
                 return entities.map((entity, idx) => {
@@ -372,6 +508,15 @@ export class VehiclePanel extends LitElement {
                     ></overlay-badge>
                   `;
                 });
+              })}
+              ${ghostEntities.map(({ key, label, pos, reason }) => {
+                const topPct = pos?.top !== undefined ? clampPercentage(pos.top) : 50;
+                const leftPct = pos?.left !== undefined ? clampPercentage(pos.left) : 50;
+                return html`
+                  <div class="ghost-badge" style="top:${topPct}%;left:${leftPct}%;" title="${reason}">
+                    ${label}
+                  </div>
+                `;
               })}
             </div>
           </div>
