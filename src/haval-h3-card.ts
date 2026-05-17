@@ -73,7 +73,7 @@ export class HavalH3Card extends LitElement {
     }
     .card-content {
       display: grid;
-      grid-template-columns: minmax(0, var(--left-column, 50%)) minmax(360px, var(--right-column, 50%));
+      grid-template-columns: minmax(0, var(--left-column, 1fr)) minmax(0, var(--right-column, 1fr));
       gap: 12px;
       min-height: 0;
       flex: 1;
@@ -85,9 +85,6 @@ export class HavalH3Card extends LitElement {
       flex: 1 1 auto;
       min-width: 0;
       min-height: 0;
-    }
-    .panel-shell.map-column {
-      min-width: 360px;
     }
     .panel-shell > * {
       flex: 1 1 auto;
@@ -117,9 +114,6 @@ export class HavalH3Card extends LitElement {
       }
       .card-content {
         grid-template-columns: minmax(0, 1fr);
-      }
-      .panel-shell.map-column {
-        min-width: 0;
       }
     }
 
@@ -210,10 +204,9 @@ export class HavalH3Card extends LitElement {
     const editMode = this.config.display?.edit_positions === true;
     const vehicleName = this.config.vehicle?.name || this.config.title || 'Haval H3';
     const dashboardTitle = this.config.title || vehicleName;
-    const totalWidth = Math.max(leftWidth + rightWidth, 1);
-    const normalizedLeft = (leftWidth / totalWidth) * 100;
-    const normalizedRight = (rightWidth / totalWidth) * 100;
-    const rootStyle = `--left-column:${normalizedLeft}%; --right-column:${normalizedRight}%;`;
+    const visualLeft = Math.max(leftWidth, 40);
+    const visualRight = Math.max(rightWidth, 52);
+    const rootStyle = `--left-column:${visualLeft}fr; --right-column:${visualRight}fr;`;
 
     return html`
       <div class="card-shell${editMode ? ' is-editing' : ''}" style=${rootStyle}>
