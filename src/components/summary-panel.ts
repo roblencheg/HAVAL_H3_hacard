@@ -2,6 +2,7 @@ import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { ResolvedEntity, DisplayConfig } from '../types';
 import { formatEntityValue, getEntityIcon, getEntityColor, showEntity } from '../utils/entity-resolver';
+import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 
 export class SummaryPanel extends LitElement {
   @property({ attribute: false }) entities: ResolvedEntity[] = [];
@@ -15,22 +16,22 @@ export class SummaryPanel extends LitElement {
     .summary-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
     .chip {
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
+      gap: 3px;
+      padding: 3px 8px;
       border-radius: 8px;
       background: var(--summary-chip-bg, rgba(255, 255, 255, 0.08));
-      font-size: 11px;
+      font-size: 10px;
       color: var(--primary-text-color, #fff);
     }
     .chip ha-icon {
-      width: 14px;
-      height: 14px;
-      --mdc-icon-size: 14px;
+      width: 12px;
+      height: 12px;
+      --mdc-icon-size: 12px;
     }
     .chip-label {
       opacity: 0.6;
@@ -48,9 +49,15 @@ export class SummaryPanel extends LitElement {
       return html``;
     }
 
+    const sorted = [...this.entities].sort((a, b) => {
+      const orderA = SENSOR_PRESETS_BY_KEY.get(a.key || '')?.summary_order ?? 999;
+      const orderB = SENSOR_PRESETS_BY_KEY.get(b.key || '')?.summary_order ?? 999;
+      return orderA - orderB;
+    });
+
     return html`
       <div class="summary-container">
-        ${this.entities.map((entity) => {
+        ${sorted.map((entity) => {
           if (!showEntity(entity, this.display)) return html``;
           const icon = getEntityIcon(entity, entity.config);
           const color = getEntityColor(entity, entity.config, this.display);

@@ -7,6 +7,8 @@ export interface PositionConfig {
   right?: number;
 }
 
+export type RenderArea = 'vehicle' | 'summary' | 'map' | 'hidden';
+
 export interface EntityConfig {
   entity?: string;
   enabled?: boolean;
@@ -18,7 +20,8 @@ export interface EntityConfig {
   precision?: number;
   hide_unavailable?: boolean;
   color_rules?: ColorRule[];
-  render_area?: 'vehicle' | 'summary' | 'map' | 'hidden';
+  render_area?: RenderArea;
+  force_vehicle?: boolean;
 }
 
 export interface ColorRule {

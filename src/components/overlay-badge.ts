@@ -23,21 +23,21 @@ export class OverlayBadge extends LitElement {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 12px;
-      background: var(--overlay-badge-bg, rgba(0, 0, 0, 0.65));
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      font-size: 11px;
+      gap: 3px;
+      padding: 2px 5px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      font-size: 10px;
       line-height: 1.4;
       white-space: nowrap;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
       border: 1px solid var(--overlay-badge-border, rgba(255, 255, 255, 0.1));
       transform: none;
-      max-width: 170px;
-      min-height: 24px;
+      max-width: 130px;
+      min-height: 18px;
       overflow: hidden;
     }
     .badge:hover {
@@ -54,15 +54,15 @@ export class OverlayBadge extends LitElement {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
-      height: 16px;
-      flex: 0 0 16px;
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
       overflow: hidden;
     }
     .icon ha-icon {
-      width: 14px;
-      height: 14px;
-      --mdc-icon-size: 14px;
+      width: 12px;
+      height: 12px;
+      --mdc-icon-size: 12px;
     }
     .label,
     .value,
@@ -73,18 +73,18 @@ export class OverlayBadge extends LitElement {
     }
     .label {
       color: var(--overlay-badge-label, rgba(255, 255, 255, 0.7));
-      font-size: 9px;
+      font-size: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      max-width: 72px;
+      max-width: 48px;
     }
     .value {
       font-weight: 600;
-      font-size: 12px;
-      max-width: 90px;
+      font-size: 10px;
+      max-width: 64px;
     }
     .unit {
-      font-size: 9px;
+      font-size: 8px;
       opacity: 0.7;
     }
     .tooltip {

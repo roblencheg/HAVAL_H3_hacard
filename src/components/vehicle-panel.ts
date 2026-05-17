@@ -1,12 +1,14 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CardConfig, ResolvedEntity, DisplayConfig, PositionConfig } from '../types';
+import { CardConfig, ResolvedEntity, DisplayConfig, PositionConfig, EntityConfig } from '../types';
 import { resolveEntity, showEntity } from '../utils/entity-resolver';
 import { mergeConfig } from '../utils/config-schema';
 import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 import { clampPercentage } from '../utils/position-resolver';
+import { WheelKey, WHEEL_LABELS, WHEEL_POSITION_KEYS, getWheelGroupKey, getWheelTargetKeys } from './wheel-badge';
 import './overlay-badge';
+import './wheel-badge';
 import './summary-panel';
 
 interface HassEntity {
@@ -16,6 +18,41 @@ interface HassEntity {
 
 interface HassState {
   states: Record<string, HassEntity>;
+}
+
+const VEHICLE_ALLOWED_KEYS = new Set([
+  'hood',
+  'trunk',
+  'door_front_left',
+  'door_front_right',
+  'door_back_left',
+  'door_back_right',
+  'battery_voltage',
+  'fuel',
+  'cabin_temp',
+  'outdoor_temp',
+  'engine_temperature',
+  'left_side_temperature',
+  'right_side_temperature',
+]);
+
+const TIRE_KEYS = new Set([
+  'front_left_tire_pressure',
+  'front_right_tire_pressure',
+  'rear_left_tire_pressure',
+  'rear_right_tire_pressure',
+  'front_left_tire_temp',
+  'front_right_tire_temp',
+  'rear_left_tire_temp',
+  'rear_right_tire_temp',
+]);
+
+interface WheelGroup {
+  wheelKey: WheelKey;
+  pressureEntity: ResolvedEntity | null;
+  tempEntity: ResolvedEntity | null;
+  pressureConfig: EntityConfig | null;
+  tempConfig: EntityConfig | null;
 }
 
 export class VehiclePanel extends LitElement {
@@ -148,8 +185,10 @@ export class VehiclePanel extends LitElement {
 
     const resolved: ResolvedEntity[] = [];
     for (const [key, ent] of Object.entries(entities)) {
+      if (TIRE_KEYS.has(key)) continue;
       const renderArea = ent.render_area || SENSOR_PRESETS_BY_KEY.get(key)?.render_area;
       if (renderArea && renderArea !== 'vehicle') continue;
+      if (!VEHICLE_ALLOWED_KEYS.has(key) && !ent.force_vehicle) continue;
       const resolvedEntity = resolveEntity(this.hass as any, ent, display);
       if (showEntity(resolvedEntity, display)) {
         resolved.push({ ...resolvedEntity, key });
@@ -170,10 +209,37 @@ export class VehiclePanel extends LitElement {
       if (renderArea !== 'summary') continue;
       const resolvedEntity = resolveEntity(this.hass as any, ent, display);
       if (showEntity(resolvedEntity, display)) {
-        resolved.push(resolvedEntity);
+        resolved.push({ ...resolvedEntity, key: _key });
       }
     }
     return resolved;
+  }
+
+  private _getWheelGroups(): WheelGroup[] {
+    const merged = mergeConfig(this.config as unknown as Partial<CardConfig>);
+    const entities = merged.entities;
+    const display = merged.display!;
+    if (!entities) return [];
+
+    const wheelKeys: WheelKey[] = ['front_left', 'front_right', 'rear_left', 'rear_right'];
+    const resolvedMap = new Map<string, ResolvedEntity>();
+
+    for (const [key, ent] of Object.entries(entities)) {
+      if (!TIRE_KEYS.has(key)) continue;
+      const re = resolveEntity(this.hass as any, ent, display);
+      if (re) {
+        resolvedMap.set(key, { ...re, key });
+      }
+    }
+
+    return wheelKeys.map((wk) => {
+      const [pKey, tKey] = getWheelTargetKeys(wk);
+      const pressureEntity = resolvedMap.get(pKey) ?? null;
+      const tempEntity = resolvedMap.get(tKey) ?? null;
+      const pressureConfig = pressureEntity ? (entities[pKey] as EntityConfig) || null : null;
+      const tempConfig = tempEntity ? (entities[tKey] as EntityConfig) || null : null;
+      return { wheelKey: wk, pressureEntity, tempEntity, pressureConfig, tempConfig };
+    }).filter((g) => g.pressureEntity || g.tempEntity);
   }
 
   private _handleBadgeDragStart(ev: CustomEvent): void {
@@ -246,6 +312,7 @@ export class VehiclePanel extends LitElement {
     };
 
     const vehicleEntities = this.getResolvedEntities();
+    const wheelGroups = this._getWheelGroups();
     const positionGroups = new Map<string, ResolvedEntity[]>();
     for (const entity of vehicleEntities) {
       const pos = entity.config.position || 'default';
@@ -266,6 +333,24 @@ export class VehiclePanel extends LitElement {
             </div>
             <div class="overlay-container" @badge-drag-start=${this._handleBadgeDragStart}>
               ${isDebug ? html`<div class="debug-grid">${debugGridLines}</div>` : ''}
+              ${wheelGroups.map((group) => {
+                const groupKey = getWheelGroupKey(group.wheelKey);
+                const preview = this._previewPositions[groupKey];
+                const customPos = group.pressureConfig?.custom_position || group.tempConfig?.custom_position;
+                return html`
+                  <wheel-badge
+                    .wheelKey=${group.wheelKey}
+                    .pressureEntity=${group.pressureEntity || undefined}
+                    .tempEntity=${group.tempEntity || undefined}
+                    .pressureConfig=${group.pressureConfig || undefined}
+                    .tempConfig=${group.tempConfig || undefined}
+                    .display=${this.config.display || {}}
+                    .cardConfig=${this.config}
+                    .editable=${editMode}
+                    .customPosition=${(preview as PositionConfig) || customPos}
+                  ></wheel-badge>
+                `;
+              })}
               ${Array.from(positionGroups.entries()).map(([_pos, entities]) => {
                 const count = entities.length;
                 return entities.map((entity, idx) => {

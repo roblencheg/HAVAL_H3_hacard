@@ -1,4 +1,5 @@
-import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout } from '../types';
+import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout, RenderArea } from '../types';
+import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
 
 const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover', 'edit_positions'];
@@ -15,6 +16,45 @@ function normalizeVehicleImage(rawImage?: string): string {
   return value;
 }
 
+export function normalizeEntityAreas(config: CardConfig): CardConfig {
+  const entities = config.entities;
+  if (!entities) return config;
+
+  const normalized: Record<string, EntityConfig> = {};
+  for (const [key, ent] of Object.entries(entities)) {
+    if (!ent) continue;
+    const preset = SENSOR_PRESETS_BY_KEY.get(key);
+    if (!preset) {
+      normalized[key] = ent;
+      continue;
+    }
+    const updated: EntityConfig = { ...ent };
+    if (!updated.render_area) {
+      updated.render_area = preset.render_area as RenderArea;
+    } else if (preset.locked_render_area && updated.render_area !== preset.render_area) {
+      updated.render_area = preset.render_area as RenderArea;
+    }
+    if (!updated.position) {
+      updated.position = preset.position;
+    }
+    if (!updated.label) {
+      updated.label = preset.label;
+    }
+    if (!updated.unit && preset.unit) {
+      updated.unit = preset.unit;
+    }
+    if (updated.precision === undefined && preset.precision !== undefined) {
+      updated.precision = preset.precision;
+    }
+    normalized[key] = updated;
+  }
+
+  return {
+    ...config,
+    entities: normalized,
+  };
+}
+
 export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
   const display: DisplayConfig = {
     ...DEFAULT_DISPLAY,
@@ -29,7 +69,7 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     }
   }
 
-  return {
+  const merged: CardConfig = {
     type: raw.type || 'custom:haval-h3-dashboard-card',
     title: raw.title || 'Haval H3',
     vehicle_image: normalizeVehicleImage(raw.vehicle_image),
@@ -43,6 +83,8 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     entities,
     display,
   };
+
+  return normalizeEntityAreas(merged);
 }
 
 function normalizeEntityConfig(ent: Partial<EntityConfig>): EntityConfig {

@@ -8,7 +8,9 @@ export interface SensorPreset {
   aliases: string[];
   category: string;
   render_area: 'vehicle' | 'summary' | 'map' | 'hidden';
+  locked_render_area?: boolean;
   overlay_priority?: number;
+  summary_order?: number;
 }
 
 export type SensorCategory = 'TPMS' | 'Doors / Openings' | 'Power / Engine' | 'Security / Service' | 'Climate' | 'Info' | 'Map';
@@ -36,6 +38,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'front_left_tire_pressure', 'tire_fl_pressure', 'tyre_fl_pressure', 'fl_pressure',
@@ -53,6 +56,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'front_right_tire_pressure', 'tire_fr_pressure', 'tyre_fr_pressure', 'fr_pressure',
@@ -70,6 +74,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'rear_left_tire_pressure', 'tire_rl_pressure', 'tyre_rl_pressure', 'rl_pressure',
@@ -87,6 +92,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 5,
     aliases: [
       'rear_right_tire_pressure', 'tire_rr_pressure', 'tyre_rr_pressure', 'rr_pressure',
@@ -103,6 +109,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 5,
     aliases: [
       'front_left_tire_temp', 'tire_fl_temp', 'front_left_tire_temperature',
@@ -118,6 +125,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 5,
     aliases: [
       'front_right_tire_temp', 'tire_fr_temp', 'front_right_tire_temperature',
@@ -133,6 +141,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 5,
     aliases: [
       'rear_left_tire_temp', 'tire_rl_temp', 'rear_left_tire_temperature',
@@ -148,6 +157,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'TPMS',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 5,
     aliases: [
       'rear_right_tire_temp', 'tire_rr_temp', 'rear_right_tire_temperature',
@@ -164,6 +174,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'hood', 'haval_h3_hood',
@@ -176,6 +187,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: ['trunk'],
   },
@@ -186,6 +198,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'door_front_left', 'haval_h3_door_front_left',
@@ -198,6 +211,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'door_front_right', 'haval_h3_door_front_right',
@@ -210,6 +224,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'door_back_left', 'haval_h3_door_back_left',
@@ -222,6 +237,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Doors / Openings',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'door_back_right', 'haval_h3_door_back_right',
@@ -235,8 +251,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'ignition',
     domains: ['binary_sensor', 'sensor'],
     category: 'Power / Engine',
-    render_area: 'vehicle',
-    overlay_priority: 10,
+    render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 50,
     aliases: [
       'ignition', 'haval_h3_ignition',
     ],
@@ -247,8 +264,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'engine_state',
     domains: ['binary_sensor', 'sensor'],
     category: 'Power / Engine',
-    render_area: 'vehicle',
-    overlay_priority: 10,
+    render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 45,
     aliases: [
       'engine_running', 'haval_h3_engine_running',
     ],
@@ -259,8 +277,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'engine_state',
     domains: ['sensor', 'binary_sensor'],
     category: 'Power / Engine',
-    render_area: 'vehicle',
-    overlay_priority: 10,
+    render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 40,
     aliases: [
       'engine_state', 'haval_h3_engine_state',
     ],
@@ -274,6 +293,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 105,
     aliases: [
       'akkumuliator', 'аккумулятор', 'battery', 'vehicle_battery',
     ],
@@ -287,6 +308,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'voltazh_akkumuliatora', 'voltazh', 'battery_voltage', 'voltage', 'вольтаж аккумулятора',
@@ -302,6 +324,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'toplivo', 'fuel', 'fuel_level', 'уровень топлива',
@@ -316,6 +339,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 20,
     aliases: [
       'zapas_khoda', 'range', 'range_km', 'запас хода',
     ],
@@ -328,6 +353,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 10,
     aliases: [
       'probeg', 'mileage', 'odometer', 'пробег',
       'haval_h3_mileage',
@@ -342,6 +369,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Power / Engine',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 100,
     aliases: [
       'uroven_masla', 'oil_qty', 'oil_level', 'уровень масла',
     ],
@@ -354,8 +383,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'security_mode',
     domains: ['sensor', 'binary_sensor'],
     category: 'Security / Service',
-    render_area: 'vehicle',
-    overlay_priority: 10,
+    render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 60,
     aliases: [
       'security_mode', 'haval_h3_security_mode',
     ],
@@ -367,6 +397,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor', 'binary_sensor'],
     category: 'Security / Service',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 80,
     aliases: [
       'status_tbox', 'tbox_status', 'статус tbox',
     ],
@@ -378,6 +410,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['binary_sensor', 'sensor'],
     category: 'Security / Service',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 70,
     aliases: [
       'tbox_onlain', 'tbox_online', 'online', 'онлайн',
     ],
@@ -389,6 +423,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor', 'binary_sensor'],
     category: 'Security / Service',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 90,
     aliases: [
       'status_obsluzhivaniia', 'service_status', 'service', 'статус обслуживания',
     ],
@@ -403,6 +439,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Climate',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'cabin_temp', 'haval_h3_cabin_temperature', 'cabin_temperature',
@@ -416,6 +453,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Climate',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'temperatura_vozdukha', 'outdoor_temperature', 'ambient_temperature', 'температура воздуха',
@@ -430,6 +468,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Climate',
     render_area: 'vehicle',
+    locked_render_area: true,
     overlay_priority: 10,
     aliases: [
       'temperatura_dvigatelia', 'engine_temperature', 'coolant_temperature', 'температура двигателя',
@@ -443,7 +482,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'cabin',
     domains: ['sensor'],
     category: 'Climate',
-    render_area: 'summary',
+    render_area: 'vehicle',
+    locked_render_area: true,
+    overlay_priority: 10,
     aliases: [
       'left_side_temperature', 'haval_h3_left_side_temperature',
     ],
@@ -455,7 +496,9 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     position: 'cabin',
     domains: ['sensor'],
     category: 'Climate',
-    render_area: 'summary',
+    render_area: 'vehicle',
+    locked_render_area: true,
+    overlay_priority: 10,
     aliases: [
       'right_side_temperature', 'haval_h3_right_side_temperature',
     ],
@@ -469,6 +512,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 130,
     aliases: [
       'label', 'haval_h3_label',
     ],
@@ -480,6 +525,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 115,
     aliases: [
       'marka', 'make', 'brand', 'марка',
     ],
@@ -491,6 +538,8 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 110,
     aliases: [
       'model', 'модель',
     ],
@@ -502,8 +551,25 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 120,
     aliases: [
       'tsvet', 'color', 'цвет',
+    ],
+  },
+  {
+    key: 'sim_balance',
+    label: 'SIM',
+    unit: '₽',
+    position: 'info_block',
+    domains: ['sensor'],
+    category: 'Info',
+    render_area: 'summary',
+    locked_render_area: true,
+    summary_order: 30,
+    aliases: [
+      'sim_balance', 'haval_h3_sim_balance', 'cesar_sim_balance',
+      'balance', 'balans', 'баланс', 'баланс sim', 'баланс сим',
     ],
   },
   {
@@ -514,6 +580,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'map',
+    locked_render_area: true,
     aliases: [
       'location_speed', 'haval_h3_location_speed', 'speed',
     ],
@@ -525,6 +592,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'map',
+    locked_render_area: true,
     aliases: [
       'location_course', 'haval_h3_location_course', 'course',
     ],
@@ -536,6 +604,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['sensor'],
     category: 'Info',
     render_area: 'map',
+    locked_render_area: true,
     aliases: [
       'last_update', 'haval_h3_last_update', 'last_updated', 'updated',
     ],
@@ -549,6 +618,7 @@ export const SENSOR_PRESETS: SensorPreset[] = [
     domains: ['device_tracker'],
     category: 'Map',
     render_area: 'map',
+    locked_render_area: true,
     aliases: [
       'lavash_mestopolozhenie', 'device_tracker.haval_h3',
       'mestopolozhenie', 'location', 'haval_h3', 'местоположение',
@@ -592,7 +662,7 @@ export function getDefaultEntities(): Record<string, import('./types').EntityCon
 
 export const BROAD_ALIASES = new Set([
   'battery', 'fuel', 'speed', 'model', 'color', 'status',
-  'online', 'service', 'location',
+  'online', 'service', 'location', 'balance',
 ]);
 
 export const CONTEXT_WORDS = [

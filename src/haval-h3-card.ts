@@ -3,6 +3,7 @@ import { property } from 'lit/decorators.js';
 import { CardConfig } from './types';
 import { CARD_NAME, CARD_VERSION } from './const';
 import { mergeConfig, validateConfig } from './utils/config-schema';
+import { parseWheelKey, getWheelTargetKeys } from './components/wheel-badge';
 import './components/vehicle-panel';
 import './components/map-panel';
 
@@ -153,10 +154,22 @@ export class HavalH3Card extends LitElement {
 
     const config = JSON.parse(JSON.stringify(this.config));
     config.entities = config.entities || {};
-    config.entities[key] = {
-      ...(config.entities[key] || {}),
-      custom_position,
-    };
+
+    const wheelKey = parseWheelKey(key);
+    if (wheelKey) {
+      const [pKey, tKey] = getWheelTargetKeys(wheelKey);
+      for (const targetKey of [pKey, tKey]) {
+        config.entities[targetKey] = {
+          ...(config.entities[targetKey] || {}),
+          custom_position,
+        };
+      }
+    } else {
+      config.entities[key] = {
+        ...(config.entities[key] || {}),
+        custom_position,
+      };
+    }
 
     this.config = config;
 

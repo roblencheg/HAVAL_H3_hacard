@@ -257,7 +257,8 @@ export class HavalH3Editor extends LitElement {
         unit: merged[r.key]?.unit || preset.unit,
         position: merged[r.key]?.position || preset.position,
         precision: merged[r.key]?.precision ?? preset.precision,
-        render_area: merged[r.key]?.render_area || (r.render_area as 'vehicle' | 'summary' | 'map' | 'hidden' | undefined),
+        render_area: merged[r.key]?.render_area || preset.render_area,
+        custom_position: merged[r.key]?.custom_position,
       };
     }
     this._updateField('entities', merged);
@@ -279,6 +280,12 @@ export class HavalH3Editor extends LitElement {
     this._updateField('map', mapConfig);
 
     this._autoDetecting = false;
+  }
+
+  private _getPairedTireKey(key: string): string | null {
+    if (key.endsWith('_pressure')) return key.replace(/_pressure$/, '_temp');
+    if (key.endsWith('_temp')) return key.replace(/_temp$/, '_pressure');
+    return null;
   }
 
   private _renderSensorRow(sensor: SensorPreset): TemplateResult {
@@ -329,14 +336,20 @@ export class HavalH3Editor extends LitElement {
             placeholder="${sensor.unit || 'unit'}" />
         </div>
         <div class="sensor-field" style="flex: 0 0 100px; min-width: 80px;">
-          <select class="field-select"
-            @change=${(e: Event) => this._updateEntityField(sensor.key, 'render_area', (e.target as HTMLSelectElement).value || undefined)}>
-            <option value="">preset (${sensor.render_area})</option>
-            <option value="vehicle" ?selected=${currentRenderArea === 'vehicle'}>Vehicle</option>
-            <option value="summary" ?selected=${currentRenderArea === 'summary'}>Summary</option>
-            <option value="map" ?selected=${currentRenderArea === 'map'}>Map</option>
-            <option value="hidden" ?selected=${currentRenderArea === 'hidden'}>Hidden</option>
-          </select>
+          ${sensor.locked_render_area ? html`
+            <select class="field-select" disabled title="Render area is locked for system presets">
+              <option selected>${currentRenderArea || sensor.render_area}</option>
+            </select>
+          ` : html`
+            <select class="field-select"
+              @change=${(e: Event) => this._updateEntityField(sensor.key, 'render_area', (e.target as HTMLSelectElement).value || undefined)}>
+              <option value="">preset (${sensor.render_area})</option>
+              <option value="vehicle" ?selected=${currentRenderArea === 'vehicle'}>Vehicle</option>
+              <option value="summary" ?selected=${currentRenderArea === 'summary'}>Summary</option>
+              <option value="map" ?selected=${currentRenderArea === 'map'}>Map</option>
+              <option value="hidden" ?selected=${currentRenderArea === 'hidden'}>Hidden</option>
+            </select>
+          `}
         </div>
         <div class="sensor-field small">
           <select class="field-select"
@@ -363,8 +376,17 @@ export class HavalH3Editor extends LitElement {
 
   private _resetEntityPosition(sensorKey: string): void {
     const entities = this.config.entities;
-    if (!entities?.[sensorKey]) return;
-    delete entities[sensorKey].custom_position;
+    if (!entities) return;
+    const keysToReset = [sensorKey];
+    const paired = this._getPairedTireKey(sensorKey);
+    if (paired && entities[paired]) {
+      keysToReset.push(paired);
+    }
+    for (const k of keysToReset) {
+      if (entities[k]?.custom_position) {
+        delete entities[k].custom_position;
+      }
+    }
     this._valueChanged();
   }
 
@@ -410,6 +432,10 @@ export class HavalH3Editor extends LitElement {
             ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'map').length} map
           </div>
         ` : ''}
+        <div class="note" style="margin-bottom:12px;">
+          Tire pressure and temperature sensors are automatically grouped into combined wheel badges on the vehicle image.
+          Dragging a wheel badge saves the position to both the pressure and temperature entities.
+        </div>
         ${SECTIONS.filter((s) => s.title !== 'Map / Device Tracker').map((section) => html`
           <h4>${section.title}</h4>
           ${section.sensors.map((s) => this._renderSensorRow(s))}

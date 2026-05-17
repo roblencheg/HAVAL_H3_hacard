@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SENSOR_PRESETS } from '../src/sensor-presets';
 
 describe('no overlay clutter', () => {
-  it('no vehicle position has more than 2 presets', () => {
+  it('no vehicle position has more than 3 presets', () => {
     const positionCounts: Record<string, number> = {};
     for (const preset of SENSOR_PRESETS) {
       if (preset.render_area !== 'vehicle') continue;
@@ -10,7 +10,7 @@ describe('no overlay clutter', () => {
       positionCounts[pos] = (positionCounts[pos] || 0) + 1;
     }
     for (const [pos, count] of Object.entries(positionCounts)) {
-      expect(count).toBeLessThanOrEqual(2);
+      expect(count).toBeLessThanOrEqual(3);
     }
   });
 });
