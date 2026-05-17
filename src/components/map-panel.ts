@@ -22,70 +22,25 @@ export class MapPanel extends LitElement {
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      border-radius: 18px;
+      border-radius: 14px;
       min-height: 400px;
     }
     .map-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 18px;
+      gap: 10px;
       overflow: hidden;
-      background:
-        radial-gradient(circle at top right, rgba(71, 132, 175, 0.16), transparent 30%),
-        linear-gradient(180deg, rgba(13, 24, 35, 0.82), rgba(8, 15, 22, 0.92));
+      background: transparent;
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-    .map-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-    .map-title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-    .map-title {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 650;
-      color: #fff;
-      letter-spacing: -0.02em;
-    }
-    .map-subtitle {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.4;
-      color: rgba(208, 220, 233, 0.72);
-    }
-    .map-state {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(234, 241, 248, 0.9);
-      font-size: 12px;
-      white-space: nowrap;
     }
     .map-container {
       flex: 1;
       position: relative;
       min-height: 300px;
       overflow: hidden;
-      border-radius: 16px;
-      background: rgba(6, 11, 18, 0.44);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      background: rgba(6, 11, 18, 0.32);
     }
     .map-container ha-map {
       width: 100%;
@@ -97,38 +52,27 @@ export class MapPanel extends LitElement {
     .summary-panel {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
+      gap: 8px;
     }
     .summary-item {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.045);
-      color: var(--primary-text-color, #fff);
-      min-height: 88px;
-    }
-    .summary-item-top {
-      display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: rgba(198, 214, 229, 0.78);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--primary-text-color, #fff);
     }
     .summary-item ha-icon {
-      width: 16px;
-      height: 16px;
-      --mdc-icon-size: 16px;
+      width: 15px;
+      height: 15px;
+      --mdc-icon-size: 15px;
+      color: rgba(210, 226, 240, 0.82);
     }
     .summary-value {
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 1.25;
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 1.3;
       color: #fff;
     }
     .placeholder {
@@ -141,9 +85,7 @@ export class MapPanel extends LitElement {
       gap: 12px;
       padding: 40px;
       text-align: center;
-      background:
-        radial-gradient(circle at top, rgba(72, 192, 255, 0.08), transparent 36%),
-        rgba(5, 10, 16, 0.3);
+      background: rgba(5, 10, 16, 0.3);
     }
     .placeholder ha-icon {
       width: 48px;
@@ -232,7 +174,6 @@ export class MapPanel extends LitElement {
     const speed = this.getSpeed();
     const course = this.getCourse();
     const lastUpdate = this.getLastUpdate();
-    const heading = this.title || 'Map';
     const hasLiveLocation = hasData && latlon;
 
     const mapEntities: string[] = [];
@@ -244,19 +185,6 @@ export class MapPanel extends LitElement {
 
     return html`
       <div class="map-wrapper">
-        <div class="map-header">
-          <div class="map-title-block">
-            <h3 class="map-title">${heading}</h3>
-            <p class="map-subtitle">
-              ${hasLiveLocation
-                ? 'Live vehicle position with quick trip context.'
-                : hasData
-                  ? 'Map source is configured, waiting for fresh coordinates.'
-                  : 'Connect a tracker or explicit latitude/longitude entities.'}
-            </p>
-          </div>
-          <div class="map-state">${hasLiveLocation ? 'Live GPS signal' : hasData ? 'Waiting for GPS' : 'Map not configured'}</div>
-        </div>
         <div class="map-container">
           ${hasLiveLocation ? html`
             <ha-map
@@ -280,37 +208,25 @@ export class MapPanel extends LitElement {
           <div class="summary-panel">
             ${speed != null ? html`
               <div class="summary-item">
-                <div class="summary-item-top">
-                  <ha-icon icon="mdi:speedometer"></ha-icon>
-                  <span>Speed</span>
-                </div>
+                <ha-icon icon="mdi:speedometer"></ha-icon>
                 <span class="summary-value">${speed} km/h</span>
               </div>
             ` : ''}
             ${course != null ? html`
               <div class="summary-item">
-                <div class="summary-item-top">
-                  <ha-icon icon="mdi:compass"></ha-icon>
-                  <span>Course</span>
-                </div>
+                <ha-icon icon="mdi:compass"></ha-icon>
                 <span class="summary-value">${course}°</span>
               </div>
             ` : ''}
             ${lastUpdate != null ? html`
               <div class="summary-item">
-                <div class="summary-item-top">
-                  <ha-icon icon="mdi:clock-outline"></ha-icon>
-                  <span>Updated</span>
-                </div>
+                <ha-icon icon="mdi:clock-outline"></ha-icon>
                 <span class="summary-value">${lastUpdate}</span>
               </div>
             ` : ''}
             ${latlon ? html`
               <div class="summary-item">
-                <div class="summary-item-top">
-                  <ha-icon icon="mdi:crosshairs-gps"></ha-icon>
-                  <span>GPS</span>
-                </div>
+                <ha-icon icon="mdi:crosshairs-gps"></ha-icon>
                 <span class="summary-value">${latlon.lat.toFixed(4)}, ${latlon.lon.toFixed(4)}</span>
               </div>
             ` : ''}

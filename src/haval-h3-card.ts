@@ -40,102 +40,33 @@ export class HavalH3Card extends LitElement {
       flex-direction: column;
       width: 100%;
       height: 100%;
-      gap: 14px;
-      padding: 16px;
+      gap: 12px;
+      padding: 10px;
       box-sizing: border-box;
-      border-radius: 26px;
-      border: 1px solid rgba(125, 152, 179, 0.18);
-      background:
-        radial-gradient(circle at top left, rgba(65, 92, 122, 0.34), transparent 42%),
-        radial-gradient(circle at top right, rgba(18, 137, 167, 0.18), transparent 28%),
-        linear-gradient(180deg, rgba(15, 23, 34, 0.96), rgba(10, 17, 26, 0.94));
-      box-shadow:
-        0 16px 34px rgba(0, 0, 0, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      background: transparent;
     }
     .card-shell.is-editing {
-      border-color: rgba(72, 192, 255, 0.36);
-      box-shadow:
-        0 18px 36px rgba(0, 0, 0, 0.25),
-        0 0 0 1px rgba(72, 192, 255, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-    .hero {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .hero-copy {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 0;
-    }
-    .eyebrow {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(146, 175, 205, 0.78);
+      box-shadow: 0 0 0 1px rgba(72, 192, 255, 0.16);
     }
     .card-title {
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 600;
       margin: 0;
-      line-height: 1.1;
-      letter-spacing: -0.04em;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
       color: var(--primary-text-color, #fff);
-    }
-    .hero-subtitle {
-      margin: 0;
-      max-width: 760px;
-      color: rgba(214, 224, 236, 0.76);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .hero-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(234, 242, 251, 0.88);
-      font-size: 12px;
-      line-height: 1;
-      white-space: nowrap;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .pill strong {
-      font-weight: 700;
-      color: #fff;
-    }
-    .pill.editing {
-      border-color: rgba(72, 192, 255, 0.32);
-      background: rgba(72, 192, 255, 0.12);
-      color: #d8f3ff;
     }
     .edit-banner {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(72, 192, 255, 0.2);
-      background: linear-gradient(135deg, rgba(31, 98, 137, 0.28), rgba(19, 39, 58, 0.38));
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(72, 192, 255, 0.08);
       color: rgba(228, 245, 255, 0.92);
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 12px;
+      line-height: 1.4;
     }
     .edit-banner strong {
       color: #fff;
@@ -143,52 +74,13 @@ export class HavalH3Card extends LitElement {
     .card-content {
       display: grid;
       grid-template-columns: minmax(0, var(--left-column, 1fr)) minmax(0, var(--right-column, 1fr));
-      gap: 14px;
+      gap: 12px;
       min-height: 0;
       flex: 1;
     }
     .panel-shell {
       display: flex;
-      flex-direction: column;
       min-width: 0;
-      min-height: 0;
-      padding: 14px;
-      gap: 12px;
-      border-radius: 22px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
-        rgba(7, 14, 22, 0.5);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-    .panel-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .panel-kicker {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(143, 171, 199, 0.72);
-    }
-    .panel-title {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 650;
-      color: #fff;
-      letter-spacing: -0.02em;
-    }
-    .panel-caption {
-      margin: 0;
-      color: rgba(211, 221, 232, 0.68);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-    .panel-body {
-      display: flex;
-      flex: 1;
       min-height: 0;
     }
     .error {
@@ -206,27 +98,20 @@ export class HavalH3Card extends LitElement {
 
     @media (max-width: 768px) {
       .card-shell {
-        padding: 14px;
-        border-radius: 22px;
-      }
-      .hero {
-        gap: 12px;
+        padding: 8px;
       }
       .card-title {
-        font-size: 21px;
+        font-size: 16px;
       }
       .card-content {
         grid-template-columns: minmax(0, 1fr);
-      }
-      .panel-shell {
-        padding: 12px;
       }
     }
 
     @media (max-height: 500px) {
       .card-shell {
-        padding: 10px;
-        gap: 10px;
+        padding: 6px;
+        gap: 8px;
       }
     }
   `;
@@ -307,66 +192,34 @@ export class HavalH3Card extends LitElement {
 
     const leftWidth = this.config.layout?.left_width ?? 50;
     const rightWidth = this.config.layout?.right_width ?? 50;
-    const badgeCount = (this.config.badges || []).filter((badge) => badge.enabled !== false).length;
     const editMode = this.config.display?.edit_positions === true;
-    const mapReady = !!(this.config.map?.device_tracker || (this.config.map?.latitude_entity && this.config.map?.longitude_entity));
     const vehicleName = this.config.vehicle?.name || this.config.title || 'Haval H3';
     const dashboardTitle = this.config.title || vehicleName;
-    const rootStyle = `--left-column:${leftWidth}; --right-column:${rightWidth};`;
+    const rootStyle = `--left-column:${leftWidth}fr; --right-column:${rightWidth}fr;`;
 
     return html`
       <div class="card-shell${editMode ? ' is-editing' : ''}" style=${rootStyle}>
-        <div class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow">Vehicle Dashboard</div>
-            <h2 class="card-title">${dashboardTitle}</h2>
-            <p class="hero-subtitle">
-              ${vehicleName} overview with live vehicle overlays, clearer sensor grouping, and a dedicated map surface.
-            </p>
-          </div>
-          <div class="hero-pills">
-            <span class="pill"><strong>${badgeCount}</strong> active badges</span>
-            <span class="pill"><strong>${leftWidth}/${rightWidth}</strong> layout split</span>
-            <span class="pill"><strong>${mapReady ? 'Ready' : 'Waiting'}</strong> map</span>
-            <span class="pill${editMode ? ' editing' : ''}">
-              <strong>${editMode ? 'Editing positions' : 'Live layout'}</strong>
-            </span>
-          </div>
-        </div>
+        ${this.config.title ? html`<h2 class="card-title">${dashboardTitle}</h2>` : ''}
         ${editMode ? html`
           <div class="edit-banner">
-            <strong>Position edit mode is active.</strong>
-            Drag a badge on the vehicle image and release it to save. After the next drop, editing turns off automatically to prevent accidental moves.
+            <strong>Edit mode.</strong>
+            Drag a badge and release to save its position.
           </div>
         ` : ''}
         <div class="card-content">
           <section class="panel-shell">
-            <div class="panel-meta">
-              <div class="panel-kicker">Vehicle</div>
-              <h3 class="panel-title">Sensor overlay</h3>
-              <p class="panel-caption">Key vehicle entities stay anchored to the image for faster visual scanning.</p>
-            </div>
-            <div class="panel-body">
-              <vehicle-panel
-                .config=${this.config}
-                .hass=${this.hass}
-                @badge-position-changed=${this._handleBadgePositionChanged}
-              ></vehicle-panel>
-            </div>
+            <vehicle-panel
+              .config=${this.config}
+              .hass=${this.hass}
+              @badge-position-changed=${this._handleBadgePositionChanged}
+            ></vehicle-panel>
           </section>
           <section class="panel-shell">
-            <div class="panel-meta">
-              <div class="panel-kicker">Location</div>
-              <h3 class="panel-title">Trip map</h3>
-              <p class="panel-caption">GPS, speed, course, and freshness are grouped into a single map workspace.</p>
-            </div>
-            <div class="panel-body">
-              <map-panel
-                .mapConfig=${this.config.map || {}}
-                .hass=${this.hass}
-                .title=${'Vehicle location'}
-              ></map-panel>
-            </div>
+            <map-panel
+              .mapConfig=${this.config.map || {}}
+              .hass=${this.hass}
+              .title=${''}
+            ></map-panel>
           </section>
         </div>
       </div>

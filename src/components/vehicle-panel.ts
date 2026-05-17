@@ -89,21 +89,17 @@ export class VehiclePanel extends LitElement {
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      border-radius: 18px;
-      background:
-        radial-gradient(circle at top center, rgba(69, 114, 153, 0.12), transparent 34%),
-        linear-gradient(180deg, rgba(17, 27, 39, 0.78), rgba(9, 16, 24, 0.86));
+      border-radius: 14px;
+      background: transparent;
       min-height: 400px;
     }
     .mode-banner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
-      margin-bottom: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(72, 192, 255, 0.16);
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
       background: rgba(72, 192, 255, 0.08);
       color: rgba(224, 244, 255, 0.92);
       font-size: 12px;
@@ -123,12 +119,9 @@ export class VehiclePanel extends LitElement {
       justify-content: center;
       position: relative;
       overflow: hidden;
-      border-radius: 18px;
-      padding: 12px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
-        rgba(7, 15, 24, 0.44);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 8px;
+      background: rgba(7, 15, 24, 0.24);
     }
     .image-stage {
       position: relative;
@@ -178,29 +171,18 @@ export class VehiclePanel extends LitElement {
       height: 48px;
       --mdc-icon-size: 48px;
     }
-    .vehicle-title {
-      text-align: center;
-      padding: 10px 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(244, 247, 251, 0.96);
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 14px;
-      margin-bottom: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
     .chip-zone {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      padding: 2px 2px 10px;
+      padding: 0 0 8px;
       justify-content: center;
     }
     .chip-zone.above {
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
     .chip-zone.below {
-      padding-top: 10px;
+      padding-top: 8px;
     }
   `;
 
@@ -276,11 +258,10 @@ export class VehiclePanel extends LitElement {
     const belowBadges = this._getBadgesByArea('below_vehicle');
 
     return html`
-      ${this.config.vehicle?.name ? html`<div class="vehicle-title">${this.config.vehicle.name}</div>` : ''}
       ${editMode ? html`
         <div class="mode-banner">
-          <strong>Drag badges to reposition them</strong>
-          <span>Release the pointer to save the new coordinates and exit edit mode.</span>
+          <strong>Edit mode.</strong>
+          <span>Drag a badge and release to save.</span>
         </div>
       ` : ''}
       ${aboveBadges.length ? html`
