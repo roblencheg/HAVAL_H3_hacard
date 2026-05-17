@@ -305,4 +305,6 @@ export class VehiclePanel extends LitElement {
   }
 }
 
-customElements.define('vehicle-panel', VehiclePanel);
+if (!window.customElements.get('vehicle-panel')) {
+  window.customElements.define('vehicle-panel', VehiclePanel);
+}

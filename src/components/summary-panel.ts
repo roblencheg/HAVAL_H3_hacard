@@ -71,4 +71,6 @@ export class SummaryPanel extends LitElement {
   }
 }
 
-customElements.define('summary-panel', SummaryPanel);
+if (!window.customElements.get('summary-panel')) {
+  window.customElements.define('summary-panel', SummaryPanel);
+}

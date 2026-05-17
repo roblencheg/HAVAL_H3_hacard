@@ -252,4 +252,6 @@ export class MapPanel extends LitElement {
   }
 }
 
-customElements.define('map-panel', MapPanel);
+if (!window.customElements.get('map-panel')) {
+  window.customElements.define('map-panel', MapPanel);
+}
