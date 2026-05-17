@@ -1,13 +1,8 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import { CardConfig, EntityConfig } from './types';
+import { CardConfig, CustomBadgeConfig, BadgeArea } from './types';
 import { CARD_NAME, EDITOR_NAME } from './const';
-import {
-  autoDetectEntities,
-  autoDetectMapEntities,
-  AutoDiscoveryResult,
-} from './utils/entity-autodiscovery';
-import { SENSOR_PRESETS, SENSOR_PRESETS_BY_KEY, SENSOR_SECTIONS, POSITION_OPTIONS, getDefaultEntities, SensorPreset } from './sensor-presets';
+import { mergeConfig } from './utils/config-schema';
 
 interface HassEntity {
   entity_id?: string;
@@ -19,19 +14,15 @@ interface HomeAssistant {
   [key: string]: unknown;
 }
 
-type Section = { title: string; sensors: SensorPreset[] };
+let _badgeCounter = Date.now();
 
-const SECTIONS: Section[] = SENSOR_SECTIONS.map((s) => ({
-  title: s.title,
-  sensors: (Array.from(SENSOR_PRESETS_BY_KEY.values()) as SensorPreset[]).filter((p) => p.category === s.category),
-})).filter((s) => s.sensors.length > 0);
+function makeBadgeId(): string {
+  return `badge_${++_badgeCounter}_${Math.random().toString(36).slice(2, 6)}`;
+}
 
 export class HavalH3Editor extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: CardConfig;
-
-  private _autoDetectResults: Map<string, AutoDiscoveryResult> = new Map();
-  private _autoDetecting = false;
 
   static styles = css`
     :host {
@@ -49,56 +40,48 @@ export class HavalH3Editor extends LitElement {
       padding-bottom: 6px;
       border-bottom: 1px solid var(--divider-color, rgba(255,255,255,0.1));
     }
-    .editor-section h4 {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--secondary-text-color, #aaa);
-      margin: 16px 0 8px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
     .field-row {
       display: flex;
       gap: 12px;
       margin-bottom: 8px;
       flex-wrap: wrap;
     }
-    .sensor-row {
+    .badge-row {
       display: flex;
-      gap: 8px;
-      margin-bottom: 6px;
-      padding: 6px 8px;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
       border-radius: 8px;
       background: var(--input-bg, rgba(255,255,255,0.03));
-      align-items: center;
-      flex-wrap: wrap;
+      border: 1px solid var(--divider-color, rgba(255,255,255,0.08));
     }
-    .sensor-row:hover {
-      background: var(--input-bg, rgba(255,255,255,0.07));
-    }
-    .sensor-toggle {
-      flex: 0 0 auto;
+    .badge-row-header {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
-    .sensor-key {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--secondary-text-color, #888);
-      min-width: 140px;
-      font-family: monospace;
+    .badge-row-header label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
     }
-    .sensor-field {
-      flex: 1;
-      min-width: 100px;
-    }
-    .sensor-field.small {
-      min-width: 60px;
-      flex: 0.5;
+    .badge-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
     }
     .field {
       flex: 1;
-      min-width: 200px;
+      min-width: 150px;
+    }
+    .field.small {
+      flex: 0 0 80px;
+      min-width: 60px;
     }
     .field-label {
       display: block;
@@ -143,7 +126,7 @@ export class HavalH3Editor extends LitElement {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .checkbox-row label {
       font-size: 13px;
@@ -175,22 +158,18 @@ export class HavalH3Editor extends LitElement {
       background: var(--primary-color, #03a9f4);
       color: #fff;
     }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-danger {
+      border-color: var(--error-color, #f44336);
+      color: var(--error-color, #f44336);
     }
-    .detect-hint {
-      font-size: 11px;
-      color: var(--success-color, #4caf50);
-      margin-left: 4px;
+    .btn-danger:hover {
+      background: var(--error-color, #f44336);
+      color: #fff;
     }
-    .detect-confidence {
+    .pos-label {
       font-size: 10px;
       color: var(--secondary-text-color, #888);
-      margin-left: 4px;
-    }
-    .collapsed {
-      display: none;
+      font-family: monospace;
     }
   `;
 
@@ -218,182 +197,183 @@ export class HavalH3Editor extends LitElement {
     this._valueChanged();
   }
 
-  private _updateEntityField(sensorKey: string, field: string, value: unknown): void {
-    const path = `entities.${sensorKey}.${field}`;
-    this._updateField(path, value);
+  private _updateBadgeField(index: number, field: string, value: unknown): void {
+    const badges = [...(this.config.badges || [])];
+    if (!badges[index]) return;
+    badges[index] = { ...badges[index], [field]: value } as CustomBadgeConfig;
+    this._updateField('badges', badges);
   }
 
-  private _getEntityConfig(sensorKey: string): EntityConfig {
-    return this.config.entities?.[sensorKey] || {};
+  private _addBadge(): void {
+    const badges = [...(this.config.badges || [])];
+    badges.push({
+      id: makeBadgeId(),
+      entity: '',
+      area: 'below_vehicle',
+      enabled: true,
+    });
+    this._updateField('badges', badges);
   }
 
-  private _addDefaultLayout(): void {
-    const defaults = getDefaultEntities();
-    const merged: Record<string, EntityConfig> = { ...(this.config.entities || {}) };
-    for (const [key, cfg] of Object.entries(defaults)) {
-      if (!merged[key]) {
-        merged[key] = cfg;
+  private _removeBadge(index: number): void {
+    const badges = [...(this.config.badges || [])];
+    badges.splice(index, 1);
+    this._updateField('badges', badges);
+  }
+
+  private _applyEntityDefaults(index: number, entityId: string): void {
+    const badges = [...(this.config.badges || [])];
+    const badge = badges[index];
+    if (!badge || !entityId) return;
+
+    const state = this.hass?.states?.[entityId];
+    if (!state) return;
+    const attrs = state.attributes || {};
+    const updated: Record<string, unknown> = {};
+    if (!badge.name) {
+      updated.name = attrs.friendly_name as string || '';
+    }
+    if (!badge.icon) {
+      updated.icon = attrs.icon as string || '';
+    }
+    if (!badge.unit) {
+      const dc = attrs.device_class as string;
+      const uom = attrs.unit_of_measurement as string;
+      if (uom) {
+        updated.unit = uom;
+      } else if (dc === 'temperature') {
+        updated.unit = '°C';
+      } else if (dc === 'voltage') {
+        updated.unit = 'V';
       }
     }
-    this._updateField('entities', merged);
+    if (Object.keys(updated).length === 0) return;
+    badges[index] = { ...badge, ...updated } as CustomBadgeConfig;
+    this._updateField('badges', badges);
   }
 
-  private async _autoDetect(): Promise<void> {
-    if (!this.hass?.states) return;
-    this._autoDetecting = true;
-    await 0;
-    const results = autoDetectEntities(this.hass.states);
-    this._autoDetectResults = new Map(results.map((r) => [r.key, r]));
-
-    const merged: Record<string, EntityConfig> = { ...(this.config.entities || {}) };
-    for (const r of results) {
-      const preset = SENSOR_PRESETS_BY_KEY.get(r.key);
-      if (!preset) continue;
-      merged[r.key] = {
-        ...(merged[r.key] || {}),
-        enabled: true,
-        entity: r.entityId,
-        label: merged[r.key]?.label || preset.label,
-        unit: merged[r.key]?.unit || preset.unit,
-        position: merged[r.key]?.position || preset.position,
-        precision: merged[r.key]?.precision ?? preset.precision,
-        render_area: merged[r.key]?.render_area || preset.render_area,
-        custom_position: merged[r.key]?.custom_position,
-      };
+  private _handleEntityChange(index: number, e: CustomEvent | Event): void {
+    let value = '';
+    if ('detail' in e) {
+      value = e.detail?.value || '';
+    } else {
+      value = (e.target as HTMLInputElement).value;
     }
-    this._updateField('entities', merged);
-
-    const mapResult = autoDetectMapEntities(this.hass.states);
-    const mapConfig = { ...(this.config.map || {}) };
-    if (mapResult.device_tracker && !mapConfig.device_tracker) {
-      mapConfig.device_tracker = mapResult.device_tracker;
+    this._updateBadgeField(index, 'entity', value);
+    if (value) {
+      this._applyEntityDefaults(index, value);
     }
-    if (mapResult.speed_entity && !mapConfig.speed_entity) {
-      mapConfig.speed_entity = mapResult.speed_entity;
-    }
-    if (mapResult.course_entity && !mapConfig.course_entity) {
-      mapConfig.course_entity = mapResult.course_entity;
-    }
-    if (mapResult.updated_entity && !mapConfig.updated_entity) {
-      mapConfig.updated_entity = mapResult.updated_entity;
-    }
-    this._updateField('map', mapConfig);
-
-    this._autoDetecting = false;
   }
 
-  private _getPairedTireKey(key: string): string | null {
-    if (key.endsWith('_pressure')) return key.replace(/_pressure$/, '_temp');
-    if (key.endsWith('_temp')) return key.replace(/_temp$/, '_pressure');
-    return null;
-  }
-
-  private _renderSensorRow(sensor: SensorPreset): TemplateResult {
-    const cfg = this._getEntityConfig(sensor.key);
-    const isEnabled = cfg.enabled !== false;
-    const entityId = cfg.entity || '';
-    const autoResult = this._autoDetectResults.get(sensor.key);
+  private _renderBadgeCard(badge: CustomBadgeConfig, index: number): TemplateResult {
     const hasEntityPicker = customElements.get('ha-entity-picker') !== undefined;
-    const currentRenderArea = cfg.render_area || sensor.render_area || '';
+    const isOnVehicle = badge.area === 'on_vehicle';
 
     const onEntityChange = hasEntityPicker
-      ? (e: CustomEvent) => this._updateEntityField(sensor.key, 'entity', e.detail?.value || '')
-      : (e: InputEvent) => this._updateEntityField(sensor.key, 'entity', (e.target as HTMLInputElement).value);
+      ? (e: CustomEvent) => this._handleEntityChange(index, e)
+      : (e: Event) => this._handleEntityChange(index, e);
 
     return html`
-      <div class="sensor-row">
-        <div class="sensor-toggle">
-          <input type="checkbox" ?checked=${isEnabled}
-            @change=${(e: Event) => this._updateEntityField(sensor.key, 'enabled', (e.target as HTMLInputElement).checked)} />
+      <div class="badge-row">
+        <div class="badge-row-header">
+          <label>
+            <input type="checkbox" ?checked=${badge.enabled !== false}
+              @change=${(e: Event) => this._updateBadgeField(index, 'enabled', (e.target as HTMLInputElement).checked)} />
+            Badge #${index + 1}
+          </label>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" @click=${() => this._removeBadge(index)}>Delete</button>
         </div>
-        <div class="sensor-key">${sensor.key}</div>
-        <div class="sensor-field">
-          ${hasEntityPicker ? html`
-            <ha-entity-picker
-              .hass=${this.hass}
-              .value=${entityId}
-              .includeDomains=${['sensor', 'binary_sensor', 'device_tracker']}
-              @value-changed=${onEntityChange}
-            ></ha-entity-picker>
-            ${autoResult && !entityId ? html`<span class="detect-hint">→ ${autoResult.entityId}</span>` : ''}
-          ` : html`
-            <input class="field-input" .value=${entityId}
-              @input=${onEntityChange}
-              placeholder="sensor.xxx" />
-            ${autoResult && !entityId ? html`<span class="detect-hint">→ ${autoResult.entityId}</span>` : ''}
-          `}
-          ${autoResult && entityId ? html`<span class="detect-hint">✓ ${autoResult.entityId}</span>` : ''}
-          ${autoResult ? html`<span class="detect-confidence">score ${autoResult.confidence}, ${autoResult.reason}</span>` : ''}
-        </div>
-        <div class="sensor-field small">
-          <input class="field-input" .value=${cfg.label || sensor.label || ''}
-            @input=${(e: InputEvent) => this._updateEntityField(sensor.key, 'label', (e.target as HTMLInputElement).value)}
-            placeholder="${sensor.label}" />
-        </div>
-        <div class="sensor-field small">
-          <input class="field-input" .value=${cfg.unit || sensor.unit || ''}
-            @input=${(e: InputEvent) => this._updateEntityField(sensor.key, 'unit', (e.target as HTMLInputElement).value)}
-            placeholder="${sensor.unit || 'unit'}" />
-        </div>
-        <div class="sensor-field" style="flex: 0 0 100px; min-width: 80px;">
-          ${sensor.locked_render_area ? html`
-            <select class="field-select" disabled title="Render area is locked for system presets">
-              <option selected>${currentRenderArea || sensor.render_area}</option>
-            </select>
-          ` : html`
+        <div class="badge-fields">
+          <div class="field" style="flex:2;">
+            <label class="field-label">Entity</label>
+            ${hasEntityPicker ? html`
+              <ha-entity-picker
+                .hass=${this.hass}
+                .value=${badge.entity || ''}
+                @value-changed=${onEntityChange}
+              ></ha-entity-picker>
+            ` : html`
+              <input class="field-input" .value=${badge.entity || ''}
+                @input=${onEntityChange}
+                placeholder="sensor.xxx" />
+            `}
+          </div>
+          <div class="field">
+            <label class="field-label">Name</label>
+            <input class="field-input" .value=${badge.name || ''}
+              @input=${(e: InputEvent) => this._updateBadgeField(index, 'name', (e.target as HTMLInputElement).value)}
+              placeholder="My Sensor" />
+          </div>
+          <div class="field">
+            <label class="field-label">Icon</label>
+            <input class="field-input" .value=${badge.icon || ''}
+              @input=${(e: InputEvent) => this._updateBadgeField(index, 'icon', (e.target as HTMLInputElement).value)}
+              placeholder="mdi:thermometer" />
+          </div>
+          <div class="field small">
+            <label class="field-label">Unit</label>
+            <input class="field-input" .value=${badge.unit || ''}
+              @input=${(e: InputEvent) => this._updateBadgeField(index, 'unit', (e.target as HTMLInputElement).value)}
+              placeholder="°C" />
+          </div>
+          <div class="field small">
+            <label class="field-label">Precision</label>
+            <input class="field-input" type="number" .value=${badge.precision ?? ''}
+              @input=${(e: InputEvent) => this._updateBadgeField(index, 'precision', parseInt((e.target as HTMLInputElement).value) || undefined)}
+              placeholder="1" min="0" max="5" />
+          </div>
+          <div class="field small">
+            <label class="field-label">Area</label>
             <select class="field-select"
-              @change=${(e: Event) => this._updateEntityField(sensor.key, 'render_area', (e.target as HTMLSelectElement).value || undefined)}>
-              <option value="">preset (${sensor.render_area})</option>
-              <option value="vehicle" ?selected=${currentRenderArea === 'vehicle'}>Vehicle</option>
-              <option value="summary" ?selected=${currentRenderArea === 'summary'}>Summary</option>
-              <option value="map" ?selected=${currentRenderArea === 'map'}>Map</option>
-              <option value="hidden" ?selected=${currentRenderArea === 'hidden'}>Hidden</option>
+              @change=${(e: Event) => this._updateBadgeField(index, 'area', (e.target as HTMLSelectElement).value)}>
+              <option value="on_vehicle" ?selected=${badge.area === 'on_vehicle'}>On vehicle</option>
+              <option value="above_vehicle" ?selected=${badge.area === 'above_vehicle'}>Above vehicle</option>
+              <option value="below_vehicle" ?selected=${badge.area === 'below_vehicle'}>Below vehicle</option>
             </select>
-          `}
+          </div>
         </div>
-        <div class="sensor-field small">
-          <select class="field-select"
-            @change=${(e: Event) => this._updateEntityField(sensor.key, 'position', (e.target as HTMLSelectElement).value)}>
-            <option value="">auto</option>
-            ${POSITION_OPTIONS.map((p) => html`
-              <option value="${p}" ?selected=${(cfg.position || sensor.position) === p}>${p}</option>
-            `)}
-          </select>
-        </div>
-        ${sensor.precision !== undefined ? html`
-          <div class="sensor-field" style="flex: 0 0 50px; min-width: 50px;">
-            <input class="field-input" type="number" .value=${cfg.precision ?? sensor.precision ?? ''}
-              @input=${(e: InputEvent) => this._updateEntityField(sensor.key, 'precision', parseInt((e.target as HTMLInputElement).value) || undefined)}
-              placeholder="prec" min="0" max="5" style="text-align:center;" />
+        ${isOnVehicle ? html`
+          <div class="badge-fields">
+            <span class="pos-label">Position: top ${badge.position?.top?.toFixed(1) ?? '50.0'}% · left ${badge.position?.left?.toFixed(1) ?? '50.0'}%</span>
+            <button class="btn" style="padding:4px 10px;font-size:11px;" @click=${() => this._updateBadgeField(index, 'position', { top: 50, left: 50 })}>Reset to center</button>
           </div>
         ` : ''}
-        ${cfg.custom_position ? html`
-          <button class="btn" style="padding:4px 8px;font-size:11px;" @click=${() => this._resetEntityPosition(sensor.key)} title="Reset custom position">↺</button>
-        ` : ''}
+        <div class="badge-fields">
+          <div class="checkbox-row">
+            <input type="checkbox" ?checked=${badge.show_icon !== false}
+              @change=${(e: Event) => this._updateBadgeField(index, 'show_icon', (e.target as HTMLInputElement).checked || undefined)}
+              id="show_icon_${index}" />
+            <label for="show_icon_${index}">Icon</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" ?checked=${badge.show_name !== false}
+              @change=${(e: Event) => this._updateBadgeField(index, 'show_name', (e.target as HTMLInputElement).checked || undefined)}
+              id="show_name_${index}" />
+            <label for="show_name_${index}">Name</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" ?checked=${badge.show_unit !== false}
+              @change=${(e: Event) => this._updateBadgeField(index, 'show_unit', (e.target as HTMLInputElement).checked || undefined)}
+              id="show_unit_${index}" />
+            <label for="show_unit_${index}">Unit</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" ?checked=${badge.hide_unavailable === true}
+              @change=${(e: Event) => this._updateBadgeField(index, 'hide_unavailable', (e.target as HTMLInputElement).checked || undefined)}
+              id="hide_unavail_${index}" />
+            <label for="hide_unavail_${index}">Hide unavailable</label>
+          </div>
+        </div>
       </div>
     `;
-  }
-
-  private _resetEntityPosition(sensorKey: string): void {
-    const entities = this.config.entities;
-    if (!entities) return;
-    const keysToReset = [sensorKey];
-    const paired = this._getPairedTireKey(sensorKey);
-    if (paired && entities[paired]) {
-      keysToReset.push(paired);
-    }
-    for (const k of keysToReset) {
-      if (entities[k]?.custom_position) {
-        delete entities[k].custom_position;
-      }
-    }
-    this._valueChanged();
   }
 
   render(): TemplateResult {
     if (!this.config) {
       return html`<div>Loading editor...</div>`;
     }
+
+    const badges = this.config.badges || [];
 
     return html`
       <div class="editor-section">
@@ -417,31 +397,16 @@ export class HavalH3Editor extends LitElement {
       </div>
 
       <div class="editor-section">
-        <h3>Vehicle Sensors</h3>
+        <h3>Badges</h3>
         <div class="btn-row">
-          <button class="btn" @click=${this._addDefaultLayout}>Add default Haval H3 sensor layout</button>
-          <button class="btn" @click=${this._autoDetect} ?disabled=${this._autoDetecting}>
-            ${this._autoDetecting ? 'Detecting...' : 'Try auto-detect entities'}
-          </button>
+          <button class="btn" @click=${this._addBadge}>Add badge</button>
         </div>
-        ${this._autoDetectResults.size > 0 ? html`
-          <div class="note">
-            Detected ${this._autoDetectResults.size} sensors:
-            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'vehicle').length} vehicle,
-            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'summary').length} summary,
-            ${Array.from(this._autoDetectResults.values()).filter(r => r.render_area === 'map').length} map
-          </div>
+        ${badges.length === 0 ? html`
+          <div class="note">No badges configured. Click "Add badge" to add sensors.</div>
         ` : ''}
-        <div class="note" style="margin-bottom:12px;">
-          Tire pressure and temperature sensors are automatically grouped into combined wheel badges on the vehicle image.
-          Dragging a wheel badge saves the position to both the pressure and temperature entities.
-        </div>
-        ${SECTIONS.filter((s) => s.title !== 'Map / Device Tracker').map((section) => html`
-          <h4>${section.title}</h4>
-          ${section.sensors.map((s) => this._renderSensorRow(s))}
-        `)}
-        <div class="note">
-          Disabled sensors and empty entity fields are hidden on the card.
+        ${badges.map((badge, i) => this._renderBadgeCard(badge, i))}
+        <div class="note" style="margin-top:8px;">
+          Enable "Edit badge positions" in Display section and drag on-vehicle badges on the image.
         </div>
       </div>
 
@@ -453,7 +418,7 @@ export class HavalH3Editor extends LitElement {
             <input class="field-input"
               .value=${this.config.map?.device_tracker || ''}
               @input=${(e: InputEvent) => this._updateField('map.device_tracker', (e.target as HTMLInputElement).value)}
-              placeholder="device_tracker.cesar_smart_vehicle" />
+              placeholder="device_tracker.xxx" />
           </div>
         </div>
         <div class="field-row">
@@ -470,15 +435,6 @@ export class HavalH3Editor extends LitElement {
               .value=${this.config.map?.course_entity || ''}
               @input=${(e: InputEvent) => this._updateField('map.course_entity', (e.target as HTMLInputElement).value)}
               placeholder="sensor.location_course" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Last Updated Entity</label>
-            <input class="field-input"
-              .value=${this.config.map?.updated_entity || ''}
-              @input=${(e: InputEvent) => this._updateField('map.updated_entity', (e.target as HTMLInputElement).value)}
-              placeholder="sensor.last_update" />
           </div>
         </div>
         <div class="field-row">
@@ -542,25 +498,13 @@ export class HavalH3Editor extends LitElement {
             id="edit_positions" />
           <label for="edit_positions">Edit badge positions (drag to move)</label>
         </div>
-        <div class="btn-row">
-          <button class="btn" @click=${this._resetAllCustomPositions}>Reset all custom positions</button>
-        </div>
       </div>
     `;
-  }
-
-  private _resetAllCustomPositions(): void {
-    const entities = this.config.entities;
-    if (!entities) return;
-    for (const key of Object.keys(entities)) {
-      if (entities[key]?.custom_position) {
-        delete entities[key].custom_position;
-      }
-    }
-    this._valueChanged();
   }
 }
 
 if (!window.customElements.get(EDITOR_NAME)) {
   window.customElements.define(EDITOR_NAME, HavalH3Editor);
 }
+
+

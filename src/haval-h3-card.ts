@@ -2,8 +2,7 @@ import { LitElement, html, css, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { CardConfig } from './types';
 import { CARD_NAME, CARD_VERSION } from './const';
-import { mergeConfig, validateConfig } from './utils/config-schema';
-import { parseWheelKey, getWheelTargetKeys } from './components/wheel-badge';
+import { mergeConfig, validateConfig, updateBadgePosition } from './utils/config-schema';
 import './components/vehicle-panel';
 import './components/map-panel';
 
@@ -149,28 +148,11 @@ export class HavalH3Card extends LitElement {
   }
 
   private _handleBadgePositionChanged(ev: CustomEvent): void {
-    const { key, custom_position } = ev.detail || {};
-    if (!key || !custom_position) return;
+    const { id, position } = ev.detail || {};
+    if (!id || !position) return;
 
     const config = JSON.parse(JSON.stringify(this.config));
-    config.entities = config.entities || {};
-
-    const wheelKey = parseWheelKey(key);
-    if (wheelKey) {
-      const [pKey, tKey] = getWheelTargetKeys(wheelKey);
-      for (const targetKey of [pKey, tKey]) {
-        if (!config.entities[targetKey]) continue;
-        config.entities[targetKey] = {
-          ...config.entities[targetKey],
-          custom_position,
-        };
-      }
-    } else {
-      config.entities[key] = {
-        ...(config.entities[key] || {}),
-        custom_position,
-      };
-    }
+    config.badges = updateBadgePosition(config, id, position);
 
     this.config = mergeConfig(config);
 

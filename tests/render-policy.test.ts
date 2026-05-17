@@ -2,42 +2,59 @@ import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('render policy in vehicle-panel', () => {
+describe('render policy in vehicle-panel (v1.4.0)', () => {
   const source = fs.readFileSync(path.resolve(__dirname, '../src/components/vehicle-panel.ts'), 'utf-8');
 
-  it('defines VEHICLE_ALLOWED_KEYS with hood, trunk, doors, battery_voltage, fuel, temperatures', () => {
-    expect(source).toContain("'hood'");
-    expect(source).toContain("'trunk'");
-    expect(source).toContain("'door_front_left'");
-    expect(source).toContain("'door_back_right'");
-    expect(source).toContain("'battery_voltage'");
-    expect(source).toContain("'fuel'");
-    expect(source).toContain("'cabin_temp'");
-    expect(source).toContain("'outdoor_temp'");
-    expect(source).toContain("'engine_temperature'");
+  it('imports custom-badge component', () => {
+    expect(source).toContain("import './custom-badge'");
   });
 
-  it('does NOT include tire keys in VEHICLE_ALLOWED_KEYS', () => {
-    const allowedSection = source.slice(source.indexOf('VEHICLE_ALLOWED_KEYS'), source.indexOf('TIRE_KEYS'));
-    expect(allowedSection).not.toContain('tire');
+  it('has three zone methods: _getBadgesByArea', () => {
+    expect(source).toContain('_getBadgesByArea');
+    expect(source).toContain("b.area === area");
   });
 
-  it('filters unknown keys with !force_vehicle check', () => {
-    expect(source).toContain('!VEHICLE_ALLOWED_KEYS.has(key) && !ent.force_vehicle');
+  it('filters by area above_vehicle', () => {
+    expect(source).toContain("'above_vehicle'");
   });
 
-  it('skips TIRE_KEYS with continue', () => {
-    expect(source).toContain('if (TIRE_KEYS.has(key)) continue;');
+  it('filters by area on_vehicle', () => {
+    expect(source).toContain("'on_vehicle'");
   });
 
-  it('defines TIRE_KEYS with all 8 tire sensor keys', () => {
-    expect(source).toContain("'front_left_tire_pressure'");
-    expect(source).toContain("'front_right_tire_pressure'");
-    expect(source).toContain("'rear_left_tire_pressure'");
-    expect(source).toContain("'rear_right_tire_pressure'");
-    expect(source).toContain("'front_left_tire_temp'");
-    expect(source).toContain("'front_right_tire_temp'");
-    expect(source).toContain("'rear_left_tire_temp'");
-    expect(source).toContain("'rear_right_tire_temp'");
+  it('filters by area below_vehicle', () => {
+    expect(source).toContain("'below_vehicle'");
+  });
+
+  it('renders above_vehicle badges in chip-zone.above', () => {
+    expect(source).toContain('chip-zone above');
+    expect(source).toContain('<custom-badge');
+  });
+
+  it('renders on_vehicle badges with position and drag support', () => {
+    expect(source).toContain('@badge-drag-start');
+    expect(source).toContain('overlay-container');
+    expect(source).toContain('_previewPositions');
+  });
+
+  it('renders below_vehicle badges in chip-zone.below', () => {
+    expect(source).toContain('chip-zone below');
+  });
+
+  it('drag events dispatch badge-position-changed with id and position', () => {
+    expect(source).toContain("detail: { id: this._draggingId, position: { top, left } }");
+  });
+
+  it('does NOT reference TIRE_KEYS or VEHICLE_ALLOWED_KEYS', () => {
+    expect(source).not.toContain('TIRE_KEYS');
+    expect(source).not.toContain('VEHICLE_ALLOWED_KEYS');
+  });
+
+  it('does NOT reference battery-badge', () => {
+    expect(source).not.toContain('battery-badge');
+  });
+
+  it('does NOT reference ghost entities', () => {
+    expect(source).not.toContain('ghost');
   });
 });

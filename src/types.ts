@@ -64,6 +64,24 @@ export interface DisplayConfig {
 
 export type ImageLayout = 'front' | 'side_front_right';
 
+export type BadgeArea = 'on_vehicle' | 'above_vehicle' | 'below_vehicle';
+
+export interface CustomBadgeConfig {
+  id: string;
+  entity: string;
+  name?: string;
+  icon?: string;
+  unit?: string;
+  area: BadgeArea;
+  position?: PositionConfig;
+  precision?: number;
+  enabled?: boolean;
+  hide_unavailable?: boolean;
+  show_icon?: boolean;
+  show_name?: boolean;
+  show_unit?: boolean;
+}
+
 export interface CardConfig {
   type: string;
   title?: string;
@@ -76,6 +94,7 @@ export interface CardConfig {
   layout: LayoutConfig;
   map?: MapConfig;
   entities?: Record<string, EntityConfig>;
+  badges?: CustomBadgeConfig[];
   display: DisplayConfig;
 }
 

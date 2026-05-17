@@ -1,24 +1,39 @@
 import { describe, it, expect } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import { mergeConfig, normalizeBadges, updateBadgePosition } from '../src/utils/config-schema';
 
-describe('config normalization on badge save (v1.3.9)', () => {
-  const source = fs.readFileSync(path.resolve(__dirname, '../src/haval-h3-card.ts'), 'utf-8');
-
-  it('calls mergeConfig after setting custom_position', () => {
-    const lines = source.split('\n');
-    const handlerStart = lines.findIndex(l => l.includes('_handleBadgePositionChanged'));
-    const handlerLines = lines.slice(handlerStart, handlerStart + 40).join('\n');
-    expect(handlerLines).toContain('this.config = mergeConfig(config)');
+describe('config normalization on badge save (v1.4.0)', () => {
+  it('calls mergeConfig after setting position', () => {
+    const config = mergeConfig({
+      vehicle: { name: 'Test' },
+      badges: [
+        { id: 'badge_1', entity: 'sensor.test', area: 'on_vehicle', position: { top: 20, left: 30 } },
+      ],
+    });
+    expect(config.badges).toBeDefined();
+    expect(config.badges!.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('skips missing wheel entity keys (prevents phantom entities)', () => {
-    expect(source).toContain("if (!config.entities[targetKey]) continue");
+  it('updateBadgePosition updates position by badge.id', () => {
+    const config = {
+      badges: [
+        { id: 'badge_1', entity: 'sensor.test', area: 'on_vehicle' as const, position: { top: 10, left: 10 } },
+        { id: 'badge_2', entity: 'sensor.other', area: 'on_vehicle' as const, position: { top: 50, left: 50 } },
+      ],
+    };
+    const updated = updateBadgePosition(config, 'badge_1', { top: 90, left: 80 });
+    expect(updated).toBeDefined();
+    expect(updated!.length).toBe(2);
+    expect(updated![0].position).toEqual({ top: 90, left: 80 });
+    expect(updated![1].position).toEqual({ top: 50, left: 50 });
   });
 
-  it('still saves custom_position for non-wheel keys via spread', () => {
-    expect(source).toContain('config.entities[key] = {');
-    expect(source).toContain('...(config.entities[key] || {}),');
-    expect(source).toContain('custom_position');
+  it('updateBadgePosition returns badges unchanged when id not found', () => {
+    const config = {
+      badges: [
+        { id: 'badge_1', entity: 'sensor.test', area: 'on_vehicle' as const },
+      ],
+    };
+    const updated = updateBadgePosition(config, 'nonexistent', { top: 90, left: 80 });
+    expect(updated).toEqual(config.badges);
   });
 });

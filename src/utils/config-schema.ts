@@ -1,8 +1,5 @@
-import { CardConfig, EntityConfig, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout, RenderArea } from '../types';
-import { SENSOR_PRESETS_BY_KEY } from '../sensor-presets';
+import { CardConfig, EntityConfig, CustomBadgeConfig, BadgeArea, LayoutConfig, MapConfig, DisplayConfig, DEFAULT_DISPLAY, ImageLayout } from '../types';
 import { DEFAULT_VEHICLE_IMAGE } from '../generated/default-image';
-
-const BOOLEAN_KEYS = ['enabled', 'show_icons', 'show_labels', 'show_units', 'hide_unavailable', 'hide_disabled', 'status_color_rules', 'show_entity_name_on_hover', 'edit_positions'];
 
 const LEGACY_DEFAULT_IMAGE_PATHS = [
   '/local/haval_h3_white_sunroof.png',
@@ -16,43 +13,45 @@ function normalizeVehicleImage(rawImage?: string): string {
   return value;
 }
 
-export function normalizeEntityAreas(config: CardConfig): CardConfig {
-  const entities = config.entities;
-  if (!entities) return config;
-
-  const normalized: Record<string, EntityConfig> = {};
-  for (const [key, ent] of Object.entries(entities)) {
-    if (!ent) continue;
-    const preset = SENSOR_PRESETS_BY_KEY.get(key);
-    if (!preset) {
-      normalized[key] = ent;
-      continue;
-    }
-    const updated: EntityConfig = { ...ent };
-    if (!updated.render_area) {
-      updated.render_area = preset.render_area as RenderArea;
-    } else if (preset.locked_render_area && updated.render_area !== preset.render_area) {
-      updated.render_area = preset.render_area as RenderArea;
-    }
-    if (!updated.position) {
-      updated.position = preset.position;
-    }
-    if (!updated.label) {
-      updated.label = preset.label;
-    }
-    if (!updated.unit && preset.unit) {
-      updated.unit = preset.unit;
-    }
-    if (updated.precision === undefined && preset.precision !== undefined) {
-      updated.precision = preset.precision;
-    }
-    normalized[key] = updated;
-  }
-
+export function normalizeBadge(raw: Partial<CustomBadgeConfig>, index: number): CustomBadgeConfig {
   return {
-    ...config,
-    entities: normalized,
+    id: raw.id || `badge_${index}`,
+    entity: raw.entity || '',
+    name: raw.name,
+    icon: raw.icon,
+    unit: raw.unit,
+    area: raw.area || 'below_vehicle' as BadgeArea,
+    position: raw.position || (raw.area === 'on_vehicle' ? { top: 50, left: 50 } : undefined),
+    precision: raw.precision,
+    enabled: raw.enabled ?? true,
+    hide_unavailable: raw.hide_unavailable,
+    show_icon: raw.show_icon,
+    show_name: raw.show_name,
+    show_unit: raw.show_unit,
   };
+}
+
+export function normalizeBadges(rawBadges: unknown): CustomBadgeConfig[] {
+  if (!Array.isArray(rawBadges)) return [];
+  return rawBadges.map((b, i) => normalizeBadge(b || {}, i));
+}
+
+export function migrateLegacyEntitiesToBadges(raw: Partial<CardConfig>): CustomBadgeConfig[] {
+  if (raw.badges?.length) return normalizeBadges(raw.badges);
+  if (!raw.entities) return [];
+
+  return Object.entries(raw.entities).map(([key, ent], index) => ({
+    id: `legacy_${key}`,
+    entity: ent.entity || '',
+    name: ent.label || key,
+    icon: ent.icon,
+    unit: ent.unit,
+    area: (ent.render_area === 'vehicle' ? 'on_vehicle' : 'below_vehicle') as BadgeArea,
+    position: ent.custom_position || (ent.render_area === 'vehicle' ? { top: 50, left: 50 } : undefined),
+    precision: ent.precision,
+    enabled: ent.enabled ?? true,
+    hide_unavailable: ent.hide_unavailable,
+  }));
 }
 
 export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
@@ -69,6 +68,8 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     }
   }
 
+  const badges = migrateLegacyEntitiesToBadges(raw);
+
   const merged: CardConfig = {
     type: raw.type || 'custom:haval-h3-dashboard-card',
     title: raw.title || 'Haval H3',
@@ -81,10 +82,11 @@ export function mergeConfig(raw: Partial<CardConfig>): CardConfig {
     layout: normalizeLayout(raw.layout),
     map: normalizeMap(raw.map),
     entities,
+    badges,
     display,
   };
 
-  return normalizeEntityAreas(merged);
+  return merged;
 }
 
 function normalizeEntityConfig(ent: Partial<EntityConfig>): EntityConfig {
@@ -124,11 +126,17 @@ function normalizeMap(map?: Partial<MapConfig>): MapConfig {
   };
 }
 
+export function updateBadgePosition(config: CardConfig, badgeId: string, position: { top: number; left: number }): CustomBadgeConfig[] {
+  return (config.badges || []).map((badge) =>
+    badge.id === badgeId ? { ...badge, position } : badge
+  );
+}
+
 export function validateConfig(config: CardConfig): string[] {
   const warnings: string[] = [];
 
-  if (!config.entities || Object.keys(config.entities).length === 0) {
-    warnings.push('No entities configured — card will display as empty');
+  if (!config.badges || config.badges.length === 0) {
+    warnings.push('No badges configured — card will display as empty');
   }
 
   if (!config.map?.device_tracker && !config.map?.latitude_entity) {
