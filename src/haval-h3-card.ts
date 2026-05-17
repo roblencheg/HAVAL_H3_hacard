@@ -26,6 +26,8 @@ export class HavalH3Card extends LitElement {
   @property({ type: Boolean }) error = false;
   @property({ type: String }) errorMessage = '';
 
+  private _pendingBadgePositions: Record<string, { top: number; left: number }> = {};
+
   static styles = css`
     :host {
       display: block;
@@ -156,7 +158,9 @@ export class HavalH3Card extends LitElement {
     }
 
     try {
-      this.config = mergeConfig(config);
+      this._reconcilePendingBadgePositions(config);
+      const mergedConfig = this._mergePendingBadgePositionsIntoConfig(config);
+      this.config = mergeConfig(mergedConfig);
       const warnings = validateConfig(this.config);
       if (warnings.length > 0) {
         import('home-assistant-js-websocket').then(() => {
@@ -170,9 +174,52 @@ export class HavalH3Card extends LitElement {
     }
   }
 
+  private _positionsEqual(
+    a?: { top?: number; left?: number },
+    b?: { top?: number; left?: number }
+  ): boolean {
+    return a?.top === b?.top && a?.left === b?.left;
+  }
+
+  private _reconcilePendingBadgePositions(config: Partial<CardConfig>): void {
+    if (!Array.isArray(config.badges) || Object.keys(this._pendingBadgePositions).length === 0) {
+      return;
+    }
+
+    for (const badge of config.badges) {
+      if (!badge?.id) continue;
+      const pending = this._pendingBadgePositions[badge.id];
+      if (!pending) continue;
+      if (this._positionsEqual(badge.position, pending)) {
+        delete this._pendingBadgePositions[badge.id];
+      }
+    }
+  }
+
+  private _mergePendingBadgePositionsIntoConfig(config: Partial<CardConfig>): Partial<CardConfig> {
+    if (!Array.isArray(config.badges) || Object.keys(this._pendingBadgePositions).length === 0) {
+      return config;
+    }
+
+    return {
+      ...config,
+      badges: config.badges.map((badge) => {
+        if (!badge?.id) return badge;
+        const pending = this._pendingBadgePositions[badge.id];
+        if (!pending) return badge;
+        return {
+          ...badge,
+          position: { ...badge.position, ...pending },
+        };
+      }),
+    };
+  }
+
   private _handleBadgePositionChanged(ev: CustomEvent): void {
     const { id, position } = ev.detail || {};
     if (!id || !position) return;
+
+    this._pendingBadgePositions[id] = position;
 
     const config = JSON.parse(JSON.stringify(this.config));
     config.badges = updateBadgePosition(config, id, position);
@@ -180,7 +227,7 @@ export class HavalH3Card extends LitElement {
     this.config = mergeConfig(config);
 
     this.dispatchEvent(new CustomEvent('config-changed', {
-      detail: { config },
+      detail: { config: this.config },
       bubbles: true,
       composed: true,
     }));

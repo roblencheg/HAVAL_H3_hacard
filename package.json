@@ -1,6 +1,6 @@
 {
   "name": "lovelace-haval-h3-card",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Lovelace custom card for Haval H3 dashboard with interactive vehicle overlays and map tracking",
   "type": "module",
   "scripts": {

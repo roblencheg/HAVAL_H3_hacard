@@ -184,16 +184,10 @@ export class MapPanel extends LitElement {
     const lastUpdate = this.getLastUpdate();
     const hasLiveLocation = hasData && latlon;
 
-    const mapEntities: HassEntity[] = [];
+    const mapEntities: string[] = [];
     const trackerId = this.getTrackerEntityId();
     if (trackerId && this.hass.states[trackerId]) {
-      mapEntities.push(this.hass.states[trackerId]);
-    }
-    if (this.mapConfig.latitude_entity && this.mapConfig.longitude_entity) {
-      const latState = this.hass.states[this.mapConfig.latitude_entity];
-      const lonState = this.hass.states[this.mapConfig.longitude_entity];
-      if (latState) mapEntities.push(latState);
-      if (lonState) mapEntities.push(lonState);
+      mapEntities.push(trackerId);
     }
 
     return html`
@@ -203,7 +197,7 @@ export class MapPanel extends LitElement {
             <ha-map
               .entities=${mapEntities}
               .hass=${this.hass}
-              ?auto-fit=${false}
+              .autoFit=${true}
               zoom=${this.mapConfig.zoom || 15}
             ></ha-map>
           ` : html`

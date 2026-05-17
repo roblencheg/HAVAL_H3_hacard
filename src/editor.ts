@@ -503,7 +503,7 @@ export class HavalH3Editor extends LitElement {
         ${this.config.display?.edit_positions ? html`
           <div class="mode-callout">
             <strong>Position editor is armed.</strong>
-            The next drag on the live card saves the new badge coordinates and then automatically exits edit mode.
+            Drag badges on the live card, save their coordinates, and turn edit mode off only when you are done.
           </div>
         ` : ''}
       </div>

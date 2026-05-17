@@ -31,7 +31,14 @@ describe('wheel drag save in haval-h3-card (v1.4.0)', () => {
 
   it('_handleBadgePositionChanged dispatches config-changed with badge-based config', () => {
     expect(source).toContain("'config-changed'");
-    expect(source).toContain("detail: { config }");
+    expect(source).toContain("detail: { config: this.config }");
+  });
+
+  it('stores dragged badge positions locally to survive stale editor config on edit-mode exit', () => {
+    expect(source).toContain("_pendingBadgePositions");
+    expect(source).toContain("this._pendingBadgePositions[id] = position");
+    expect(source).toContain("_mergePendingBadgePositionsIntoConfig");
+    expect(source).toContain("_reconcilePendingBadgePositions");
   });
 
   it('listens for badge-position-changed event from vehicle-panel', () => {
